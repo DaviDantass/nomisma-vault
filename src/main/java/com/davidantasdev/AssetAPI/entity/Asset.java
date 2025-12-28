@@ -3,6 +3,7 @@ package com.davidantasdev.AssetAPI.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "assets")
@@ -30,6 +31,18 @@ public class Asset {
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "asset", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Investment> investments;
+
+    @OneToMany(mappedBy = "asset", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Transaction> transactions;
+
+    @OneToMany(mappedBy = "asset", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PriceHistory> priceHistories;
+
+    @OneToMany(mappedBy = "asset", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PriceAlert> priceAlerts;
 
     public Asset() {
     }
@@ -87,6 +100,38 @@ public class Asset {
 
     public LocalDateTime getLastUpdate() {
         return lastUpdate;
+    }
+
+    public List<Investment> getInvestments() {
+        return investments;
+    }
+
+    public void setInvestments(List<Investment> investments) {
+        this.investments = investments;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
+
+    public List<PriceHistory> getPriceHistories() {
+        return priceHistories;
+    }
+
+    public void setPriceHistories(List<PriceHistory> priceHistories) {
+        this.priceHistories = priceHistories;
+    }
+
+    public List<PriceAlert> getPriceAlerts() {
+        return priceAlerts;
+    }
+
+    public void setPriceAlerts(List<PriceAlert> priceAlerts) {
+        this.priceAlerts = priceAlerts;
     }
 
     public void setLastUpdate(LocalDateTime lastUpdate) {

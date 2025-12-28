@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "portfolios", uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "name"})})
@@ -26,6 +27,15 @@ public class Portfolio {
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "portfolio", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Investment> investments;
+
+    @OneToMany(mappedBy = "portfolio", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Transaction> transactions;
+
+    @OneToMany(mappedBy = "portfolio", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PortfolioSnapshot> snapshots;
 
     public Portfolio() {
     }
@@ -74,5 +84,29 @@ public class Portfolio {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public List<Investment> getInvestments() {
+        return investments;
+    }
+
+    public void setInvestments(List<Investment> investments) {
+        this.investments = investments;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
+
+    public List<PortfolioSnapshot> getSnapshots() {
+        return snapshots;
+    }
+
+    public void setSnapshots(List<PortfolioSnapshot> snapshots) {
+        this.snapshots = snapshots;
     }
 }

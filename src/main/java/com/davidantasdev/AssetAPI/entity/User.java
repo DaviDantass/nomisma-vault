@@ -5,6 +5,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class User {
@@ -29,6 +30,12 @@ public class User {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Portfolio> portfolios;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PriceAlert> priceAlerts;
 
     public User() {
     }
@@ -71,6 +78,22 @@ public class User {
     }
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public List<Portfolio> getPortfolios() {
+        return portfolios;
+    }
+
+    public void setPortfolios(List<Portfolio> portfolios) {
+        this.portfolios = portfolios;
+    }
+
+    public List<PriceAlert> getPriceAlerts() {
+        return priceAlerts;
+    }
+
+    public void setPriceAlerts(List<PriceAlert> priceAlerts) {
+        this.priceAlerts = priceAlerts;
     }
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
