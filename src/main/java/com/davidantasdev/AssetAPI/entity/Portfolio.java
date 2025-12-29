@@ -1,10 +1,13 @@
 package com.davidantasdev.AssetAPI.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "portfolios", uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "name"})})
@@ -16,9 +19,11 @@ public class Portfolio {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @NotNull(message = "Usuário não pode ser nulo")
     private User user;
 
     @Column(name = "name", length = 100, nullable = false)
+    @NotBlank(message = "Nome da carteira não pode ser vazio")
     private String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -108,5 +113,27 @@ public class Portfolio {
 
     public void setSnapshots(List<PortfolioSnapshot> snapshots) {
         this.snapshots = snapshots;
+    }
+
+    @Override
+    public String toString() {
+        return "Portfolio{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", createdAt=" + createdAt +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Portfolio portfolio = (Portfolio) o;
+        return Objects.equals(id, portfolio.id) && Objects.equals(user, portfolio.user) && Objects.equals(name, portfolio.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, user, name);
     }
 }

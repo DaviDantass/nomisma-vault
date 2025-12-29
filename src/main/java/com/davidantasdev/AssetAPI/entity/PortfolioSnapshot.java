@@ -2,11 +2,13 @@ package com.davidantasdev.AssetAPI.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.DecimalMin;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "portfolio_snapshots", uniqueConstraints = {
@@ -20,29 +22,35 @@ public class PortfolioSnapshot {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "portfolio_id", nullable = false)
+    @NotNull(message = "Portfólio não pode ser nulo")
     private Portfolio portfolio;
 
     @Column(name = "total_invested", precision = 15, scale = 2, nullable = false)
+    @NotNull(message = "Total investido não pode ser nulo")
+    @DecimalMin(value = "0", message = "Total investido não pode ser negativo")
     private BigDecimal totalInvested;
 
     @Column(name = "current_value", precision = 15, scale = 2, nullable = false)
     @NotNull(message = "O valor atual é obrigatório.")
+    @DecimalMin(value = "0", message = "Valor atual não pode ser negativo")
     private BigDecimal currentValue;
 
     @Column(name = "profit_loss", precision = 15, scale = 2, nullable = false)
+    @NotNull(message = "Lucro/Prejuízo não pode ser nulo")
     private BigDecimal profitLoss;
 
     @Column(name = "profit_loss_percent", precision = 10, scale = 4, nullable = false)
+    @NotNull(message = "Percentual de lucro/prejuízo não pode ser nulo")
     private BigDecimal profitLossPercent;
 
     @Column(name = "snapshot_date", nullable = false)
+    @NotNull(message = "Data do snapshot não pode ser nula")
     private LocalDate snapshotDate;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    // Construtores
     public PortfolioSnapshot() {
     }
 
@@ -56,19 +64,6 @@ public class PortfolioSnapshot {
         this.snapshotDate = snapshotDate;
     }
 
-    public PortfolioSnapshot(Long id, Portfolio portfolio, BigDecimal totalInvested, BigDecimal currentValue,
-                             BigDecimal profitLoss, BigDecimal profitLossPercent, LocalDate snapshotDate, LocalDateTime createdAt) {
-        this.id = id;
-        this.portfolio = portfolio;
-        this.totalInvested = totalInvested;
-        this.currentValue = currentValue;
-        this.profitLoss = profitLoss;
-        this.profitLossPercent = profitLossPercent;
-        this.snapshotDate = snapshotDate;
-        this.createdAt = createdAt;
-    }
-
-    // Getters e Setters
     public Long getId() {
         return id;
     }
@@ -132,4 +127,29 @@ public class PortfolioSnapshot {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    @Override
+    public String toString() {
+        return "PortfolioSnapshot{" +
+                "id=" + id +
+                ", totalInvested=" + totalInvested +
+                ", currentValue=" + currentValue +
+                ", profitLoss=" + profitLoss +
+                ", snapshotDate=" + snapshotDate +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PortfolioSnapshot that = (PortfolioSnapshot) o;
+        return Objects.equals(id, that.id) && Objects.equals(portfolio, that.portfolio) && Objects.equals(snapshotDate, that.snapshotDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, portfolio, snapshotDate);
+    }
 }
+

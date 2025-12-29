@@ -2,8 +2,10 @@ package com.davidantasdev.AssetAPI.entity;
 
 import com.davidantasdev.AssetAPI.entity.enums.RiskLevel;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-@Entity
+import java.util.Objects;
 @Table(name = "investment_categories")
 public class InvestmentCategory {
 
@@ -12,12 +14,14 @@ public class InvestmentCategory {
     private Long id;
 
     @Column(name = "name", length = 50, nullable = false, unique = true)
+    @NotBlank(message = "Nome da categoria não pode ser vazio")
     private String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)
+    @NotNull(message = "Nível de risco não pode ser nulo")
     @Column(name = "risk_level", length = 20)
     private RiskLevel riskLevel;
 
@@ -60,5 +64,27 @@ public class InvestmentCategory {
 
     public void setRiskLevel(RiskLevel riskLevel) {
         this.riskLevel = riskLevel;
+
+    @Override
+    public String toString() {
+        return "InvestmentCategory{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", riskLevel=" + riskLevel +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InvestmentCategory that = (InvestmentCategory) o;
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
     }
 }

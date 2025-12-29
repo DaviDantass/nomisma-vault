@@ -58,7 +58,7 @@ CREATE TABLE investments
 (
     id            BIGSERIAL PRIMARY KEY,
     portfolio_id  BIGINT         NOT NULL REFERENCES portfolios (id) ON DELETE CASCADE,
-    asset_id      BIGINT         NOT NULL REFERENCES assets (id),
+    asset_id      BIGINT         NOT NULL REFERENCES assets (id) ON DELETE CASCADE,
     quantity      DECIMAL(20, 8) NOT NULL CHECK (quantity > 0),
     average_price DECIMAL(15, 2) NOT NULL,
     purchase_date DATE           NOT NULL,
@@ -77,12 +77,12 @@ CREATE TABLE transactions
 (
     id               BIGSERIAL PRIMARY KEY,
     portfolio_id     BIGINT         NOT NULL REFERENCES portfolios (id) ON DELETE CASCADE,
-    asset_id         BIGINT         NOT NULL REFERENCES assets (id),
+    asset_id         BIGINT         NOT NULL REFERENCES assets (id) ON DELETE CASCADE,
     type             VARCHAR(10)    NOT NULL CHECK (type IN ('BUY', 'SELL')),
-    quantity         DECIMAL(20, 8) NOT NULL,
-    price            DECIMAL(15, 2) NOT NULL,
-    total_amount     DECIMAL(15, 2) NOT NULL,
-    fees             DECIMAL(10, 2) DEFAULT 0,
+    quantity         DECIMAL(20, 8) NOT NULL CHECK (quantity > 0),
+    price            DECIMAL(15, 2) NOT NULL CHECK (price > 0),
+    total_amount     DECIMAL(15, 2) NOT NULL CHECK (total_amount > 0),
+    fees             DECIMAL(10, 2) DEFAULT 0 CHECK (fees >= 0),
     transaction_date DATE           NOT NULL,
     notes            TEXT,
     created_at       TIMESTAMP      DEFAULT CURRENT_TIMESTAMP
@@ -96,7 +96,7 @@ CREATE TABLE price_history
 (
     id       BIGSERIAL PRIMARY KEY,
     asset_id BIGINT         NOT NULL REFERENCES assets (id) ON DELETE CASCADE,
-    price    DECIMAL(15, 2) NOT NULL,
+    price    DECIMAL(15, 2) NOT NULL CHECK (price > 0),
     date     DATE           NOT NULL,
 
     UNIQUE (asset_id, date)
@@ -109,8 +109,8 @@ CREATE TABLE price_alerts
 (
     id           BIGSERIAL PRIMARY KEY,
     user_id      BIGINT         NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    asset_id     BIGINT         NOT NULL REFERENCES assets (id),
-    target_price DECIMAL(15, 2) NOT NULL,
+    asset_id     BIGINT         NOT NULL REFERENCES assets (id) ON DELETE CASCADE,
+    target_price DECIMAL(15, 2) NOT NULL CHECK (target_price > 0),
     condition    VARCHAR(10) CHECK (condition IN ('ABOVE', 'BELOW')),
     is_active    BOOLEAN   DEFAULT TRUE,
     triggered_at TIMESTAMP,
@@ -124,8 +124,8 @@ CREATE TABLE portfolio_snapshots
 (
     id                  BIGSERIAL PRIMARY KEY,
     portfolio_id        BIGINT         NOT NULL REFERENCES portfolios (id) ON DELETE CASCADE,
-    total_invested      DECIMAL(15, 2) NOT NULL,
-    current_value       DECIMAL(15, 2) NOT NULL,
+    total_invested      DECIMAL(15, 2) NOT NULL CHECK (total_invested >= 0),
+    current_value       DECIMAL(15, 2) NOT NULL CHECK (current_value >= 0),
     profit_loss         DECIMAL(15, 2) NOT NULL,
     profit_loss_percent DECIMAL(10, 4) NOT NULL,
     snapshot_date       DATE           NOT NULL,

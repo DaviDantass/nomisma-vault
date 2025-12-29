@@ -1,9 +1,15 @@
 package com.davidantasdev.AssetAPI.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.DecimalMin;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "assets")
@@ -14,22 +20,27 @@ public class Asset {
     private Long id;
 
     @Column(name = "ticker", length = 20, nullable = false, unique = true)
+    @NotBlank(message = "Ticker não pode ser vazio")
     private String ticker;
 
     @Column(name = "name", length = 200, nullable = false)
+    @NotBlank(message = "Nome do ativo não pode ser vazio")
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
+    @NotNull(message = "Categoria não pode ser nula")
     private InvestmentCategory category;
 
     @Column(name = "current_price", precision = 15, scale = 2)
+    @DecimalMin(value = "0", message = "Preço não pode ser negativo")
     private BigDecimal currentPrice;
 
     @Column(name = "last_update")
     private LocalDateTime lastUpdate;
 
     @Column(name = "created_at", updatable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "asset", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -51,11 +62,6 @@ public class Asset {
         this.ticker = ticker;
         this.name = name;
         this.category = category;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -144,5 +150,29 @@ public class Asset {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Asset{" +
+                "id=" + id +
+                ", ticker='" + ticker + '\'' +
+                ", name='" + name + '\'' +
+                ", currentPrice=" + currentPrice +
+                ", createdAt=" + createdAt +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Asset asset = (Asset) o;
+        return Objects.equals(id, asset.id) && Objects.equals(ticker, asset.ticker);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, ticker);
     }
 }

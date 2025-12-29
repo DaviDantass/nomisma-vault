@@ -1,16 +1,15 @@
 package com.davidantasdev.AssetAPI.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.DecimalMin;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "investments", uniqueConstraints = {
@@ -24,19 +23,26 @@ public class Investment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "portfolio_id", nullable = false)
+    @NotNull(message = "Portfólio não pode ser nulo")
     private Portfolio portfolio;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "asset_id", nullable = false)
+    @NotNull(message = "Ativo não pode ser nulo")
     private Asset asset;
 
     @Column(name = "quantity", precision = 20, scale = 8, nullable = false)
+    @NotNull(message = "Quantidade não pode ser nula")
+    @DecimalMin(value = "0.01", message = "Quantidade deve ser maior que 0")
     private BigDecimal quantity;
 
     @Column(name = "average_price", precision = 15, scale = 2, nullable = false)
+    @NotNull(message = "Preço médio não pode ser nulo")
+    @DecimalMin(value = "0.01", message = "Preço deve ser maior que 0")
     private BigDecimal averagePrice;
 
     @Column(name = "purchase_date", nullable = false)
+    @NotNull(message = "Data de compra não pode ser nula")
     private LocalDate purchaseDate;
 
     @Column(name = "notes", columnDefinition = "TEXT")
@@ -131,5 +137,29 @@ public class Investment {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Investment{" +
+                "id=" + id +
+                ", quantity=" + quantity +
+                ", averagePrice=" + averagePrice +
+                ", purchaseDate=" + purchaseDate +
+                ", createdAt=" + createdAt +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Investment that = (Investment) o;
+        return Objects.equals(id, that.id) && Objects.equals(portfolio, that.portfolio) && Objects.equals(asset, that.asset);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, portfolio, asset);
     }
 }

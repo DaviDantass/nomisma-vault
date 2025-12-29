@@ -2,9 +2,11 @@ package com.davidantasdev.AssetAPI.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.DecimalMin;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "price_history", uniqueConstraints = {
@@ -23,13 +25,13 @@ public class PriceHistory {
 
     @Column(name = "price", precision = 15, scale = 2, nullable = false)
     @NotNull(message = "O preço é obrigatório.")
+    @DecimalMin(value = "0.01", message = "Preço deve ser maior que 0")
     private BigDecimal price;
 
     @Column(name = "date", nullable = false)
     @NotNull(message = "A data é obrigatória.")
     private LocalDate date;
 
-    // Construtores
     public PriceHistory() {
     }
 
@@ -39,14 +41,6 @@ public class PriceHistory {
         this.date = date;
     }
 
-    public PriceHistory(Long id, Asset asset, BigDecimal price, LocalDate date) {
-        this.id = id;
-        this.asset = asset;
-        this.price = price;
-        this.date = date;
-    }
-
-    // Getters e Setters
     public Long getId() {
         return id;
     }
@@ -78,5 +72,26 @@ public class PriceHistory {
     public void setDate(LocalDate date) {
         this.date = date;
     }
-}
 
+    @Override
+    public String toString() {
+        return "PriceHistory{" +
+                "id=" + id +
+                ", price=" + price +
+                ", date=" + date +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PriceHistory that = (PriceHistory) o;
+        return Objects.equals(id, that.id) && Objects.equals(asset, that.asset) && Objects.equals(date, that.date);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, asset, date);
+    }
+}

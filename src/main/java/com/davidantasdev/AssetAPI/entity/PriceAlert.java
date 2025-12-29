@@ -2,10 +2,13 @@ package com.davidantasdev.AssetAPI.entity;
 
 import com.davidantasdev.AssetAPI.entity.enums.AlertCondition;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.DecimalMin;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "price_alerts")
@@ -16,13 +19,17 @@ public class PriceAlert {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @NotNull(message = "Usuário não pode ser nulo")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "asset_id", nullable = false)
+    @NotNull(message = "Ativo não pode ser nulo")
     private Asset asset;
 
     @Column(name = "target_price", precision = 15, scale = 2, nullable = false)
+    @NotNull(message = "Preço alvo não pode ser nulo")
+    @DecimalMin(value = "0.01", message = "Preço alvo deve ser maior que 0")
     private BigDecimal targetPrice;
 
     @Enumerated(EnumType.STRING)
@@ -112,5 +119,29 @@ public class PriceAlert {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "PriceAlert{" +
+                "id=" + id +
+                ", targetPrice=" + targetPrice +
+                ", condition=" + condition +
+                ", isActive=" + isActive +
+                ", createdAt=" + createdAt +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PriceAlert that = (PriceAlert) o;
+        return Objects.equals(id, that.id) && Objects.equals(user, that.user) && Objects.equals(asset, that.asset) && Objects.equals(targetPrice, that.targetPrice);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, user, asset, targetPrice);
     }
 }
