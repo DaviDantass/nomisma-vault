@@ -20,5 +20,3 @@ public record AssetRequest(
     BigDecimal currentPrice
 ) {
 }
-) {
-}
