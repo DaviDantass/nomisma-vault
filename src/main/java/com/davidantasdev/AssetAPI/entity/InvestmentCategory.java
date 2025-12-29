@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Objects;
+
+@Entity
 @Table(name = "investment_categories")
 public class InvestmentCategory {
 
@@ -64,27 +66,27 @@ public class InvestmentCategory {
 
     public void setRiskLevel(RiskLevel riskLevel) {
         this.riskLevel = riskLevel;
+    }
 
     @Override
     public String toString() {
         return "InvestmentCategory{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
                 ", riskLevel=" + riskLevel +
                 '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InvestmentCategory that = (InvestmentCategory) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name);
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && riskLevel == that.riskLevel;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
-    }
+        return Objects.hash(id, name, description, riskLevel);
     }
 }
