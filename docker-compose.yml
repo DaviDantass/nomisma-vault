@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # ====================================
+  # BANCO DE DADOS POSTGRESQL
+  # ====================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: assetapi-postgres
+    environment:
+      POSTGRES_DB: assetapi
+      POSTGRES_USER: assetapi_user
+      POSTGRES_PASSWORD: assetapi_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - assetapi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U assetapi_user -d assetapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ====================================
+  # BACKEND SPRING BOOT
+  # ====================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: assetapi-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Database
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/assetapi
+      SPRING_DATASOURCE_USERNAME: assetapi_user
+      SPRING_DATASOURCE_PASSWORD: assetapi_pass
+      
+      # JPA
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_SHOW_SQL: "true"
+      
+      # Flyway
+      SPRING_FLYWAY_ENABLED: "true"
+      
+      # JWT (use secrets em produção!)
+      JWT_SECRET: MYINVEST_SECRET_KEY_SUPER_SECURE_2025
+      JWT_EXPIRATION: 86400000
+      
+      # Brapi API
+      BRAPI_API_URL: https://brapi.dev/api
+      BRAPI_API_TOKEN: ${BRAPI_API_TOKEN:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - assetapi-network
+    restart: unless-stopped
+
+# ====================================
+# VOLUMES PERSISTENTES
+# ====================================
+volumes:
+  postgres_data:
+    driver: local
+
+# ====================================
+# REDE ISOLADA
+# ====================================
+networks:
+  assetapi-network:
+    driver: bridge

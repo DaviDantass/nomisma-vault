@@ -1,0 +1,49 @@
+# Build artifacts
+target/
+!target/*.jar
+*.class
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.settings/
+.classpath
+.project
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+HELP.md
+docs/
+
+# Test files
+src/test/
+
+# Environment files
+.env
+.env.local
+*.env
