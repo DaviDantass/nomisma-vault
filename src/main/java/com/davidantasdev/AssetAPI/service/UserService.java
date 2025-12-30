@@ -3,6 +3,8 @@ package com.davidantasdev.AssetAPI.service;
 import com.davidantasdev.AssetAPI.dto.request.UserRequest;
 import com.davidantasdev.AssetAPI.dto.response.UserResponse;
 import com.davidantasdev.AssetAPI.entity.User;
+import com.davidantasdev.AssetAPI.exception.BusinessException;
+import com.davidantasdev.AssetAPI.exception.ResourceNotFoundException;
 import com.davidantasdev.AssetAPI.mapper.UserMapper;
 import com.davidantasdev.AssetAPI.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -22,7 +24,7 @@ public class UserService {
 
     public UserResponse findByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado com email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado com email: " + email));
         return userMapper.toResponse(user);
     }
 
@@ -31,48 +33,60 @@ public class UserService {
         return userMapper.toResponseList(users);
     }
 
+    @Transactional
     public UserResponse createUser(UserRequest userRequest) {
-        String email = userRequest.email().trim().toLowerCase();
-
-        if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("Email já cadastrado: " + email);
+        if (userRequest == null) {
+            throw new IllegalArgumentException("UserRequest não pode ser null");
         }
-
-        User user = new User();
-        user.setName(userRequest.name().trim());
+        String email = userRequest.email().trim().toLowerCase();
+        if (userRepository.existsByEmail(email)) {
+            throw new BusinessException("Email já cadastrado: " + email);
+        }
+        User user = userMapper.toEntity(userRequest);
         user.setEmail(email);
-        user.setPassword(userRequest.password());
-
+        user.setName(user.getName().trim());
         User savedUser = userRepository.save(user);
         return userMapper.toResponse(savedUser);
     }
 
+
     @Transactional
     public UserResponse updateUser(Long id, UserRequest userRequest) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado com ID: " + id));
-        if (userRequest.name() != null && !userRequest.name().isEmpty()) {
-            user.setName(userRequest.name().trim());
+
+        if (userRequest == null) {
+            throw new IllegalArgumentException("UserRequest não pode ser null");
         }
-        if (userRequest.email() != null && !userRequest.email().isEmpty()) {
-            String newEmail = userRequest.email().trim().toLowerCase();
-            if (!user.getEmail().equalsIgnoreCase(newEmail) &&
-                    userRepository.existsByEmail(newEmail)) {
-                throw new RuntimeException("Email já está em uso");
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado com ID: " + id));
+        
+        String newEmail = null;
+        if (userRequest.email() != null && !userRequest.email().isBlank()) {
+            newEmail = userRequest.email().trim().toLowerCase();
+
+            if (!user.getEmail().equalsIgnoreCase(newEmail)
+                    && userRepository.existsByEmail(newEmail)) {
+                throw new BusinessException("Email já está em uso");
             }
+        }
+
+        userMapper.updateEntityFromRequest(userRequest, user);
+
+        if (newEmail != null) {
             user.setEmail(newEmail);
         }
-        if (userRequest.password() != null && !userRequest.password().isEmpty()) {
-            user.setPassword(userRequest.password());  // TODO: Adicionar hash de senha em produção
+        if (user.getName() != null) {
+            user.setName(user.getName().trim());
         }
-        User updatedUser = userRepository.save(user);
-        return userMapper.toResponse(updatedUser);
+
+        return userMapper.toResponse(user);
     }
+
 
     @Transactional
     public void delete(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado com ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado com ID: " + id));
         userRepository.delete(user);
     }
 }
