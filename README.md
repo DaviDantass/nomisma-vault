@@ -3,7 +3,7 @@
 
 # 📈 AssetAPI
 
-### API para gerenciamento de investimentos pessoais
+### API para gerenciamento de investimentos
 
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge\&logo=openjdk\&logoColor=white)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.1-6DB33F?style=for-the-badge\&logo=spring-boot\&logoColor=white)](https://spring.io/projects/spring-boot)
@@ -16,8 +16,7 @@
 
 ## Sobre o Projeto
 
-**AssetAPI** é uma API REST para gerenciamento de investimentos pessoais. O projeto está em desenvolvimento ativo e faz parte do meu **build in public**.
-
+**AssetAPI** é uma API REST para gerenciamento de investimentos. 
 ### 🎯 Objetivo
 
 Criar uma plataforma para:
@@ -51,7 +50,7 @@ Criar uma plataforma para:
 
 ## Arquitetura
 
-### 📁 Estrutura do Projeto
+### 📁 Estrutura do Projeto (Até o momento)
 
 ```
 src/main/java/com/davidantasdev/AssetAPI/
@@ -216,7 +215,7 @@ Atualização automática de preços, alertas, snapshots de portfólio, gráfico
 
 O projeto já está containerizado com Docker, estruturado em camadas (Controller, Service, Repository), com tratamento global de erros, integração com a API Brapi e mapeamento de DTOs via MapStruct.
 
-Atualmente, estão em desenvolvimento o CRUD completo de todas as entidades, incluindo suas lógicas específicas, autenticação e autorização, cálculos financeiros, endpoints do dashboard e testes automatizados.
+Atualmente, estão em desenvolvimento todas as operações de persistência e manipulação de dados para cada entidade, incluindo suas lógicas específicas, autenticação e autorização, cálculos financeiros, endpoints do dashboard e testes automatizados.
 
 ---
 
@@ -225,8 +224,6 @@ Atualmente, estão em desenvolvimento o CRUD completo de todas as entidades, inc
 ---
 
 <div align="center">
-
-### ⭐ Gostou do projeto? Deixe uma estrela!
 
 </div>  
 
