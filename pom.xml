@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.davidantasdev</groupId>
-	<artifactId>AssetAPI</artifactId>
+	<artifactId>NomismaVault</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>AssetAPI</name>
+	<name>NomismaVault</name>
 	<description>REST API for tracking financial assets, portfolio performance, and market data integration.</description>
 	<url/>
 	<licenses>

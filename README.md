@@ -1,59 +1,60 @@
 
-<div align="center">
+<div align="left">
 
-# 📈 AssetAPI
+# 📈 NomismaVault
 
-### API para gerenciamento de investimentos
+### API para Gerenciamento de Investimentos
 
-[![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge\&logo=openjdk\&logoColor=white)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.1-6DB33F?style=for-the-badge\&logo=spring-boot\&logoColor=white)](https://spring.io/projects/spring-boot)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-316192?style=for-the-badge\&logo=postgresql\&logoColor=white)](https://www.postgresql.org/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge\&logo=docker\&logoColor=white)](https://www.docker.com/)
-
-</div>
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.1-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
 ---
 
-## Sobre o Projeto
+## 🔹 Sobre o Projeto
 
-**AssetAPI** é uma API REST para gerenciamento de investimentos. 
-### 🎯 Objetivo
+**NomismaVault** é uma API REST para **gerenciamento de investimentos e carteiras de ativos**, construída com foco em escalabilidade, confiabilidade e rastreabilidade das operações financeiras.
 
-Criar uma plataforma para:
+### Objetivos principais
+- Gerenciar múltiplas carteiras de investimento
+- Adicionar, editar e remover ativos/posições em cada carteira
+- Calcular rentabilidade real, ROI e diversificação do portfólio
+- Integrar com APIs de cotação (ex.: Brapi, CoinGecko)
+- Gerar relatórios de performance e evolução patrimonial
+- Rastrear transações financeiras detalhadas (histórico de compra/venda)
+- Configurar alertas de preço para ativos
+- Armazenar snapshots diários do portfólio para análise de evolução
 
-* Gerenciar múltiplas carteiras de investimentos
-* Calcular rentabilidade e diversificação
-* Integrar com APIs de cotação (Brapi)
-* Gerar relatórios de performance
-* Rastrear transações e evolução patrimonial
+> **Status**: Em desenvolvimento – novas features estão sendo implementadas incrementalmente.
 
-> **Status**: Projeto em desenvolvimento - Features estão sendo implementadas incrementalmente
+---
+
+## Stack Tecnológica
+
+- **Java 21** – Linguagem principal
+- **Spring Boot 4.0.1** – Framework web
+- **Spring Data JPA** – Camada de persistência
+- **Spring Validation** – Validação de entradas
+- **Spring Cache** – Cache de dados
+- **PostgreSQL 15** – Banco de dados relacional
+- **Flyway** – Versionamento de schema
+- **Lombok 1.18.30** – Redução de boilerplate
+- **MapStruct 1.5.5** – Mapeamento de DTOs
+- **Docker & Docker Compose** – Containerização
+- **Maven** – Gerenciamento de build e dependências
+- **Brapi API** – Cotações de ações brasileiras (B3)
+
 
 ---
 
-## Stack
-
-* **Java 21** - Linguagem principal
-* **Spring Boot 4.0.1** - Framework web
-* **Spring Data JPA** - Camada de persistência
-* **Spring Validation** - Validações de entrada
-* **Spring Cache** - Cache de dados
-* **PostgreSQL 15** - Banco de dados relacional
-* **Flyway** - Versionamento de schema
-* **Lombok 1.18.30** - Redução de boilerplate
-* **MapStruct 1.5.5** - Mapeamento de DTOs
-* **Docker & Docker Compose** - Containerização
-* **Maven** - Build e dependências
-* **Brapi API** - Cotações de ações brasileiras (B3)
-
----
 
 ## Arquitetura
 
 ### 📁 Estrutura do Projeto (Até o momento)
 
 ```
-src/main/java/com/davidantasdev/AssetAPI/
+src/main/java/com/davidantasdev/NomismaVault/
 │
 ├── controller/           # Endpoints REST
 │   ├── HealthController
@@ -198,28 +199,39 @@ Cliente (Postman/Browser)
 
 ---
 
-## Roadmap
+## 🗓️ Roadmap & Desenvolvimento
 
-**Fase 1 [ x ]– Fundação (Concluído)**
-Setup do projeto, modelagem do banco, Docker, JPA, controllers básicos, services, exception handling e integração com Brapi.
+**Fase 1 – Fundação ✅ (Concluído)**
+- Setup do projeto, Docker, JPA, controllers e services básicos
+- Tratamento global de exceções
+- Modelagem do banco PostgreSQL e integração inicial com **Brapi**
 
-**Fase 2 [  ]– Core Features (Em Andamento)**
-Investimentos e transações, cálculos de performance, dashboard, autenticação JWT e validações.
+**Fase 2 – Core Features (Em Andamento)**
+-  operações de persistência de Investimentos e Transações
+- Cálculos de performance (rentabilidade, ROI, diversificação)
+- Dashboard com métricas resumidas e gráficos básicos
+- Alertas de preço configuráveis
+- Autenticação JWT e validações de entrada
 
-**Fase 3 [  ]– Avançado (Planejado)**
-Atualização automática de preços, alertas, snapshots de portfólio, gráficos, relatórios, testes e documentação.
+**Fase 3 – Avançado (Depois)**
+- Atualização automática de preços (Schedulers)
+- Snapshots diários para análise histórica
+- Gráficos detalhados e comparativos
+- Testes unitários e de integração completos
+- Documentação Swagger e JavaDoc
+- Observabilidade / logs 
+- Mais Validações, exemplo: @Valid
+- Paginação
+
+## Funcionalidades Futuras
+- Integração com criptomoedas e exchanges
+- Dashboard web para visualização de portfólio
+- Alertas de performance e notificações de mercado
+- Ferramentas de simulação e projeção de investimentos
 
 ---
 
-## Desenvolvimento
-
-O projeto já está containerizado com Docker, estruturado em camadas (Controller, Service, Repository), com tratamento global de erros, integração com a API Brapi e mapeamento de DTOs via MapStruct.
-
-Atualmente, estão em desenvolvimento todas as operações de persistência e manipulação de dados para cada entidade, incluindo suas lógicas específicas, autenticação e autorização, cálculos financeiros, endpoints do dashboard e testes automatizados.
-
----
-
-## **Davi Dantas [@davidantasdev](https://github.com/davidantass)**
+**By: Davi Dantas [@davidantass](https://github.com/davidantass)**
 
 ---
 

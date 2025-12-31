@@ -16,9 +16,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - assetapi-network
+      - nomismavault-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U assetapi_user -d assetapi"]
+      test: ["CMD-SHELL", "pg_isready -U nomismavault_user -d nomismavault"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,14 +30,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: assetapi-backend
+    container_name: nomismavault-backend
     ports:
       - "8080:8080"
     environment:
       # Database
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/assetapi
-      SPRING_DATASOURCE_USERNAME: assetapi_user
-      SPRING_DATASOURCE_PASSWORD: assetapi_pass
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nomismavault
+      SPRING_DATASOURCE_USERNAME: nomismavault_user
+      SPRING_DATASOURCE_PASSWORD: nomismavault_pass
       
       # JPA
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
@@ -57,7 +57,7 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - assetapi-network
+      - nomismavault-network
     restart: unless-stopped
 
 # ====================================
@@ -71,5 +71,5 @@ volumes:
 # REDE ISOLADA
 # ====================================
 networks:
-  assetapi-network:
+  nomismavault-network:
     driver: bridge
