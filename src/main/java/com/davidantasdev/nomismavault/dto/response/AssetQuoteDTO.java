@@ -1,0 +1,13 @@
+package com.davidantasdev.nomismavault.dto.response;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+public record AssetQuoteDTO(
+    String ticker,
+    BigDecimal price,
+    BigDecimal change,
+    BigDecimal changePercent,
+    LocalDateTime timestamp
+) {
+}
