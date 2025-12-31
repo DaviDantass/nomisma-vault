@@ -9,7 +9,7 @@ CREATE TABLE users
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Categorias de investimentoz
+-- Categorias de investimentos
 CREATE TABLE investment_categories
 (
     id          BIGSERIAL PRIMARY KEY,
