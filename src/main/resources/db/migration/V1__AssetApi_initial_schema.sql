@@ -1,4 +1,3 @@
--- Usuários
 CREATE TABLE users
 (
     id         BIGSERIAL PRIMARY KEY,
@@ -9,7 +8,6 @@ CREATE TABLE users
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Categorias de investimentos
 CREATE TABLE investment_categories
 (
     id          BIGSERIAL PRIMARY KEY,
@@ -18,7 +16,6 @@ CREATE TABLE investment_categories
     risk_level  VARCHAR(20) CHECK (risk_level IN ('LOW', 'MEDIUM', 'HIGH'))
 );
 
--- Dados iniciais de categorias
 INSERT INTO investment_categories (name, description, risk_level)
 VALUES ('ACOES', 'Ações na bolsa de valores', 'HIGH'),
        ('FUNDOS_IMOBILIARIOS', 'Fundos de investimento imobiliário', 'MEDIUM'),
@@ -26,8 +23,6 @@ VALUES ('ACOES', 'Ações na bolsa de valores', 'HIGH'),
        ('CRIPTOMOEDAS', 'Bitcoin, Ethereum, etc', 'HIGH'),
        ('FUNDOS_INVESTIMENTO', 'Fundos de ações, multimercado', 'MEDIUM');
 
-
--- Ativos (ações, FIIs, cripto, etc)
 CREATE TABLE assets (
                         id BIGSERIAL PRIMARY KEY,
                         ticker VARCHAR(20) NOT NULL UNIQUE,
@@ -41,7 +36,6 @@ CREATE TABLE assets (
 CREATE INDEX idx_assets_ticker ON assets(ticker);
 CREATE INDEX idx_assets_category ON assets(category_id);
 
--- Carteiras do usuário
 CREATE TABLE portfolios
 (
     id          BIGSERIAL PRIMARY KEY,
@@ -53,7 +47,6 @@ CREATE TABLE portfolios
     UNIQUE (user_id, name)
 );
 
--- Investimentos (posições do usuário)
 CREATE TABLE investments
 (
     id            BIGSERIAL PRIMARY KEY,
@@ -72,7 +65,6 @@ CREATE TABLE investments
 CREATE INDEX idx_investments_portfolio ON investments (portfolio_id);
 CREATE INDEX idx_investments_asset ON investments (asset_id);
 
--- Transações (histórico de compra/venda)
 CREATE TABLE transactions
 (
     id               BIGSERIAL PRIMARY KEY,
@@ -91,7 +83,6 @@ CREATE TABLE transactions
 CREATE INDEX idx_transactions_portfolio ON transactions (portfolio_id);
 CREATE INDEX idx_transactions_date ON transactions (transaction_date DESC);
 
--- Histórico de preços (para gráficos de evolução)
 CREATE TABLE price_history
 (
     id       BIGSERIAL PRIMARY KEY,
@@ -104,7 +95,6 @@ CREATE TABLE price_history
 
 CREATE INDEX idx_price_history_asset_date ON price_history (asset_id, date DESC);
 
--- Alertas de preço
 CREATE TABLE price_alerts
 (
     id           BIGSERIAL PRIMARY KEY,
@@ -119,7 +109,6 @@ CREATE TABLE price_alerts
 
 CREATE INDEX idx_alerts_user_active ON price_alerts (user_id, is_active);
 
--- Snapshot de patrimônio (para gráfico de evolução)
 CREATE TABLE portfolio_snapshots
 (
     id                  BIGSERIAL PRIMARY KEY,

@@ -12,5 +12,9 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
 
     List<Portfolio> findAllByUserId(Long userId);
 
+    
     Optional<Portfolio> findByIdAndUserId(Long portfolioId, Long userId);
+    // TODO(refactor): substituir busca por userId por entidade User
+    // Motivo: manter queries orientadas a objeto (JPA best practices)
+
 }

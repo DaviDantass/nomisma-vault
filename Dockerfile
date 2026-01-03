@@ -1,45 +1,45 @@
 # ====================================
-# STAGE 1: Build da aplicação
+# STAGE 1: Application Build
 # ====================================
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 
-# Diretório de trabalho
+# Working directory
 WORKDIR /app
 
-# Copia apenas os arquivos de dependências primeiro (aproveita o cache do Docker)
+# Copy only dependency files first (leverages Docker cache)
 COPY pom.xml .
 COPY mvnw .
 COPY .mvn .mvn
 
-# Baixa as dependências (essa camada será cacheada se o pom.xml não mudar)
+# Download dependencies (this layer will be cached if pom.xml doesn't change)
 RUN mvn dependency:go-offline -B
 
-# Copia o código fonte
+# Copy source code
 COPY src ./src
 
-# Faz o build da aplicação (pula os testes para build mais rápido)
+# Build the application (skips tests for faster build)
 RUN mvn clean package -DskipTests
 
 # ====================================
-# STAGE 2: Imagem de runtime
+# STAGE 2: Runtime Image
 # ====================================
 FROM eclipse-temurin:21-jre-alpine
 
-# Adiciona usuário não-root por segurança (boa prática!)
+# Add non-root user for security (best practice!)
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
-# Diretório de trabalho
+# Working directory
 WORKDIR /app
 
-# Copia apenas o JAR da aplicação do stage anterior
+# Copy only the application JAR from previous stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Expõe a porta da aplicação
+# Expose application port
 EXPOSE 8080
 
-# Configura JVM para containers (importante!)
+# Configure JVM for containers (important!)
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
-# Comando para executar a aplicação
+# Command to run the application
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
