@@ -22,6 +22,12 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
+    public UserResponse findById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com ID: " + id));
+        return userMapper.toResponse(user);
+    }
+
     public UserResponse findByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado com email: " + email));

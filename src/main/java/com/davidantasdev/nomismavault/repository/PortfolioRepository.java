@@ -1,20 +1,16 @@
 package com.davidantasdev.nomismavault.repository;
 
 import com.davidantasdev.nomismavault.entity.Portfolio;
+import com.davidantasdev.nomismavault.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
 
-    List<Portfolio> findAllByUserId(Long userId);
+    List<Portfolio> findAllByUser(User user);
 
-    
-    Optional<Portfolio> findByIdAndUserId(Long portfolioId, Long userId);
-    // TODO(refactor): substituir busca por userId por entidade User
-    // Motivo: manter queries orientadas a objeto (JPA best practices)
+    Optional<Portfolio> findByIdAndUser(Long id, User user);
 
 }

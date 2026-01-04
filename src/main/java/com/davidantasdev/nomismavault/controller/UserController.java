@@ -25,13 +25,18 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> findAll() {
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
         List<UserResponse> users = userService.findAll();
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable @NotNull Long id) {
+        return ResponseEntity.ok(userService.findById(id));
+    }
+
     @GetMapping("/email/{email}")
-    public ResponseEntity<UserResponse> findByEmail(
+    public ResponseEntity<UserResponse> getUserByEmail(
             @PathVariable @NotNull @Email String email) {
         return ResponseEntity.ok(userService.findByEmail(email));
     }

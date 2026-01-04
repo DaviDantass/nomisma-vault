@@ -22,17 +22,17 @@ public class PortfolioController {
 
     // GET /api/users/{userId}/portfolios
     @GetMapping
-    public ResponseEntity<List<PortfolioResponse>> findAll(
+    public ResponseEntity<List<PortfolioResponse>> getAllPortfolios(
             @PathVariable Long userId) {
 
         return ResponseEntity.ok(
-                portfolioService.findAllByUserId(userId)
+                portfolioService.findAllByUser(userId)
         );
     }
 
     // GET /api/users/{userId}/portfolios/{portfolioId}
     @GetMapping("/{portfolioId}")
-    public ResponseEntity<PortfolioResponse> findById(
+    public ResponseEntity<PortfolioResponse> getPortfolioById(
             @PathVariable Long userId,
             @PathVariable Long portfolioId) {
 
@@ -43,7 +43,7 @@ public class PortfolioController {
 
     // POST /api/users/{userId}/portfolios
     @PostMapping
-    public ResponseEntity<PortfolioResponse> create(
+    public ResponseEntity<PortfolioResponse> createPortfolio(
             @PathVariable Long userId,
             @Valid @RequestBody PortfolioRequest request) {
 
@@ -54,7 +54,7 @@ public class PortfolioController {
 
     // PUT /api/users/{userId}/portfolios/{portfolioId}
     @PutMapping("/{portfolioId}")
-    public ResponseEntity<PortfolioResponse> update(
+    public ResponseEntity<PortfolioResponse> updatePortfolio(
             @PathVariable Long userId,
             @PathVariable Long portfolioId,
             @Valid @RequestBody PortfolioRequest request) {
@@ -67,7 +67,7 @@ public class PortfolioController {
     // DELETE /api/users/{userId}/portfolios/{portfolioId}
     @DeleteMapping("/{portfolioId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
+    public void deletePortfolio(
             @PathVariable Long userId,
             @PathVariable Long portfolioId) {
 

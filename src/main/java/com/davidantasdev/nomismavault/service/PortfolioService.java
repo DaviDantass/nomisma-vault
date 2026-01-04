@@ -30,15 +30,25 @@ public class PortfolioService {
         this.portfolioMapper = portfolioMapper;
     }
 
-    public List<PortfolioResponse> findAllByUserId(Long userId) {
+    public List<PortfolioResponse> findAllByUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Usuário não encontrado")
+                );
+
         return portfolioMapper.toResponseList(
-                portfolioRepository.findAllByUserId(userId)
+                portfolioRepository.findAllByUser(user)
         );
     }
 
     public PortfolioResponse findById(Long userId, Long portfolioId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Usuário não encontrado")
+                );
+
         Portfolio portfolio = portfolioRepository
-                .findByIdAndUserId(portfolioId, userId)
+                .findByIdAndUser(portfolioId, user)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Portfolio não encontrado para este usuário")
                 );
@@ -70,8 +80,13 @@ public class PortfolioService {
             Long portfolioId,
             PortfolioRequest request
     ) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Usuário não encontrado")
+                );
+
         Portfolio portfolio = portfolioRepository
-                .findByIdAndUserId(portfolioId, userId)
+                .findByIdAndUser(portfolioId, user)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Portfolio não encontrado para este usuário")
                 );
@@ -83,8 +98,13 @@ public class PortfolioService {
 
     @Transactional
     public void delete(Long userId, Long portfolioId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Usuário não encontrado")
+                );
+
         Portfolio portfolio = portfolioRepository
-                .findByIdAndUserId(portfolioId, userId)
+                .findByIdAndUser(portfolioId, user)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Portfolio não encontrado para este usuário")
                 );
