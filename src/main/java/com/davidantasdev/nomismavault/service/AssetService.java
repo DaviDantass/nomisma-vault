@@ -1,9 +1,12 @@
 package com.davidantasdev.nomismavault.service;
 
+import com.davidantasdev.nomismavault.dto.request.AssetRequest;
+import com.davidantasdev.nomismavault.dto.response.AssetResponse;
 import com.davidantasdev.nomismavault.entity.Asset;
 import com.davidantasdev.nomismavault.entity.InvestmentCategory;
 import com.davidantasdev.nomismavault.exception.BusinessException;
 import com.davidantasdev.nomismavault.exception.ResourceNotFoundException;
+import com.davidantasdev.nomismavault.mapper.AssetMapper;
 import com.davidantasdev.nomismavault.repository.AssetRepository;
 import com.davidantasdev.nomismavault.repository.InvestmentCategoryRepository;
 import org.springframework.stereotype.Service;
@@ -16,35 +19,42 @@ import java.util.List;
 public class AssetService {
     private final AssetRepository assetRepository;
     private final InvestmentCategoryRepository investmentCategoryRepository;
+    private final AssetMapper assetMapper;
 
     public AssetService(
             AssetRepository assetRepository,
-            InvestmentCategoryRepository investmentCategoryRepository
+            InvestmentCategoryRepository investmentCategoryRepository,
+            AssetMapper assetMapper
     ) {
         this.assetRepository = assetRepository;
         this.investmentCategoryRepository = investmentCategoryRepository;
+        this.assetMapper = assetMapper;
     }
 
-    public List<Asset> findAll() {
-        return assetRepository.findAll();
+    public List<AssetResponse> findAll() {
+        return assetMapper.toResponseList(assetRepository.findAll());
     }
 
-    public Asset findById(Long id) {
-        return assetRepository.findById(id)
+    public AssetResponse findById(Long id) {
+        Asset asset = assetRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Asset não encontrado")
                 );
+        return assetMapper.toResponse(asset);
     }
 
-    public Asset findByTicker(String ticker) {
-        return assetRepository.findByTicker(ticker)
+    public AssetResponse findByTicker(String ticker) {
+        Asset asset = assetRepository.findByTicker(ticker)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Asset com ticker " + ticker + " não encontrado")
                 );
+        return assetMapper.toResponse(asset);
     }
 
     @Transactional
-    public Asset create(Long categoryId, Asset asset) {
+    public AssetResponse create(Long categoryId, AssetRequest request) {
+        Asset asset = assetMapper.toEntity(request);
+        
         if (assetRepository.existsByTicker(asset.getTicker())) {
             throw new BusinessException("Já existe um asset com o ticker " + asset.getTicker());
         }
@@ -56,16 +66,19 @@ public class AssetService {
 
         asset.setCategory(category);
         asset.setLastUpdate(LocalDateTime.now());
-        return assetRepository.save(asset);
+        Asset saved = assetRepository.save(asset);
+        return assetMapper.toResponse(saved);
     }
 
     @Transactional
-    public Asset update(Long id, Long categoryId, Asset assetData) {
+    public AssetResponse update(Long id, Long categoryId, AssetRequest request) {
         Asset asset = assetRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Asset não encontrado")
                 );
 
+        Asset assetData = assetMapper.toEntity(request);
+        
         // Verificar se o ticker já existe em outro asset
         if (!asset.getTicker().equals(assetData.getTicker()) &&
                 assetRepository.existsByTicker(assetData.getTicker())) {
@@ -83,7 +96,7 @@ public class AssetService {
         asset.setCurrentPrice(assetData.getCurrentPrice());
         asset.setLastUpdate(LocalDateTime.now());
 
-        return asset;
+        return assetMapper.toResponse(asset);
     }
 
     @Transactional

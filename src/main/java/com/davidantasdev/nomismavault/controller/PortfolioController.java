@@ -4,6 +4,8 @@ import com.davidantasdev.nomismavault.dto.request.PortfolioRequest;
 import com.davidantasdev.nomismavault.dto.response.PortfolioResponse;
 import com.davidantasdev.nomismavault.service.PortfolioService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,19 +22,20 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    // GET /api/users/{userId}/portfolios
-    @GetMapping
-    public ResponseEntity<List<PortfolioResponse>> getAllPortfolios(
-            @PathVariable Long userId) {
+    // GET /api/users/{userId}/portfolios/paginated?page=0&size=10&sort=createdAt,desc
+    @GetMapping("/paginated")
+    public ResponseEntity<Page<PortfolioResponse>> findAllPortfoliosByUser(
+            @PathVariable Long userId,
+            Pageable pageable) {
 
         return ResponseEntity.ok(
-                portfolioService.findAllByUser(userId)
+                portfolioService.findAllByUser(userId, pageable)
         );
     }
 
     // GET /api/users/{userId}/portfolios/{portfolioId}
     @GetMapping("/{portfolioId}")
-    public ResponseEntity<PortfolioResponse> getPortfolioById(
+    public ResponseEntity<PortfolioResponse> findPortfolioById(
             @PathVariable Long userId,
             @PathVariable Long portfolioId) {
 
@@ -49,7 +52,9 @@ public class PortfolioController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(portfolioService.createPortfolio(request, userId));
+                .body(
+                        portfolioService.createPortfolio(request, userId)
+                );
     }
 
     // PUT /api/users/{userId}/portfolios/{portfolioId}

@@ -8,6 +8,8 @@ import com.davidantasdev.nomismavault.exception.ResourceNotFoundException;
 import com.davidantasdev.nomismavault.mapper.PortfolioMapper;
 import com.davidantasdev.nomismavault.repository.PortfolioRepository;
 import com.davidantasdev.nomismavault.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,15 +32,15 @@ public class PortfolioService {
         this.portfolioMapper = portfolioMapper;
     }
 
-    public List<PortfolioResponse> findAllByUser(Long userId) {
+
+    public Page<PortfolioResponse> findAllByUser(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Usuário não encontrado")
                 );
 
-        return portfolioMapper.toResponseList(
-                portfolioRepository.findAllByUser(user)
-        );
+        return portfolioRepository.findAllByUser(user, pageable)
+                .map(portfolioMapper::toResponse);
     }
 
     public PortfolioResponse findById(Long userId, Long portfolioId) {

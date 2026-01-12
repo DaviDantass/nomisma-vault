@@ -28,7 +28,7 @@ public class BrapiClient {
     }
 
     @Cacheable(value = "stock-quotes", key = "#ticker")
-    public AssetQuoteDTO getQuote(String ticker) {
+    public AssetQuoteDTO fetchAssetQuote(String ticker) {
         BrapiQuote quote = fetchQuote(ticker);
         return new AssetQuoteDTO(
                 quote.symbol(),
@@ -40,7 +40,7 @@ public class BrapiClient {
     }
 
     @Cacheable(value = "stock-info", key = "#ticker")
-    public AssetInfoDTO getAssetInfo(String ticker) {
+    public AssetInfoDTO fetchAssetInfo(String ticker) {
         BrapiQuote quote = fetchQuote(ticker);
         return new AssetInfoDTO(
                 quote.symbol(),

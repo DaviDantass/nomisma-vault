@@ -2,47 +2,45 @@ package com.davidantasdev.nomismavault.controller;
 
 import com.davidantasdev.nomismavault.dto.request.InvestmentRequest;
 import com.davidantasdev.nomismavault.dto.response.InvestmentResponse;
-import com.davidantasdev.nomismavault.entity.Investment;
-import com.davidantasdev.nomismavault.mapper.InvestmentMapper;
 import com.davidantasdev.nomismavault.service.InvestmentService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/portfolios/{portfolioId}/investments")
 public class InvestmentController {
 
     private final InvestmentService investmentService;
-    private final InvestmentMapper investmentMapper;
 
-    public InvestmentController(
-            InvestmentService investmentService,
-            InvestmentMapper investmentMapper) {
+    public InvestmentController(InvestmentService investmentService) {
         this.investmentService = investmentService;
-        this.investmentMapper = investmentMapper;
     }
 
     // GET /api/portfolios/{portfolioId}/investments
+    // GET /api/portfolios/1/investments?page=0&size=10&sort=createdAt,desc
     @GetMapping
-    public ResponseEntity<List<InvestmentResponse>> getAllInvestments(
-            @PathVariable Long portfolioId) {
-
-        List<Investment> investments = investmentService.findAllByPortfolio(portfolioId);
-        return ResponseEntity.ok(investmentMapper.toResponseList(investments));
+    public ResponseEntity<Page<InvestmentResponse>> findAllInvestmentsByPortfolio(
+            @PathVariable Long portfolioId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+                investmentService.findAllByPortfolio(portfolioId, pageable)
+        );
     }
+
 
     // GET /api/portfolios/{portfolioId}/investments/{investmentId}
     @GetMapping("/{investmentId}")
-    public ResponseEntity<InvestmentResponse> getInvestmentById(
+    public ResponseEntity<InvestmentResponse> findInvestmentById(
             @PathVariable Long portfolioId,
             @PathVariable Long investmentId) {
-
-        Investment investment = investmentService.findById(portfolioId, investmentId);
-        return ResponseEntity.ok(investmentMapper.toResponse(investment));
+        return ResponseEntity.ok(
+                investmentService.findById(portfolioId, investmentId)
+        );
     }
 
     // POST /api/portfolios/{portfolioId}/investments
@@ -50,12 +48,13 @@ public class InvestmentController {
     public ResponseEntity<InvestmentResponse> createInvestment(
             @PathVariable Long portfolioId,
             @Valid @RequestBody InvestmentRequest request) {
-
-        Investment investment = investmentMapper.toEntity(request);
-        Investment created = investmentService.create(portfolioId, request.assetId(), investment);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(investmentMapper.toResponse(created));
+                .body(investmentService.create(
+                        portfolioId,
+                        request.assetId(),
+                        request
+                ));
     }
 
     // PUT /api/portfolios/{portfolioId}/investments/{investmentId}
@@ -64,10 +63,14 @@ public class InvestmentController {
             @PathVariable Long portfolioId,
             @PathVariable Long investmentId,
             @Valid @RequestBody InvestmentRequest request) {
-
-        Investment investmentData = investmentMapper.toEntity(request);
-        Investment updated = investmentService.update(portfolioId, investmentId, request.assetId(), investmentData);
-        return ResponseEntity.ok(investmentMapper.toResponse(updated));
+        return ResponseEntity.ok(
+                investmentService.update(
+                        portfolioId,
+                        investmentId,
+                        request.assetId(),
+                        request
+                )
+        );
     }
 
     // DELETE /api/portfolios/{portfolioId}/investments/{investmentId}

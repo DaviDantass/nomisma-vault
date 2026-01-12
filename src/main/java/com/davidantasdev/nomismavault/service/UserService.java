@@ -7,10 +7,10 @@ import com.davidantasdev.nomismavault.exception.BusinessException;
 import com.davidantasdev.nomismavault.exception.ResourceNotFoundException;
 import com.davidantasdev.nomismavault.mapper.UserMapper;
 import com.davidantasdev.nomismavault.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class UserService {
@@ -34,10 +34,12 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
-    public List<UserResponse> findAll() {
-        List<User> users = userRepository.findAll();
-        return userMapper.toResponseList(users);
+    public Page<UserResponse> findAll(Pageable pageable) {
+        return userRepository
+                .findAll(pageable)
+                .map(userMapper::toResponse);
     }
+
 
     @Transactional
     public UserResponse createUser(UserRequest userRequest) {
