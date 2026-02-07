@@ -1,11 +1,15 @@
 package com.davidantasdev.nomismavault.service;
 
 import com.davidantasdev.nomismavault.dto.request.InvestmentRequest;
+import com.davidantasdev.nomismavault.dto.response.AssetQuoteDTO;
 import com.davidantasdev.nomismavault.dto.response.InvestmentResponse;
+import com.davidantasdev.nomismavault.dto.response.InvestmentWithPnLResponse;
 import com.davidantasdev.nomismavault.entity.Asset;
 import com.davidantasdev.nomismavault.entity.Investment;
 import com.davidantasdev.nomismavault.entity.Portfolio;
 import com.davidantasdev.nomismavault.exception.ResourceNotFoundException;
+import com.davidantasdev.nomismavault.integration.BrapiClient;
+import com.davidantasdev.nomismavault.mapper.AssetMapper;
 import com.davidantasdev.nomismavault.mapper.InvestmentMapper;
 import com.davidantasdev.nomismavault.repository.AssetRepository;
 import com.davidantasdev.nomismavault.repository.InvestmentRepository;
@@ -15,23 +19,47 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @Service
 public class InvestmentService {
     private final InvestmentRepository investmentRepository;
     private final PortfolioRepository portfolioRepository;
     private final AssetRepository assetRepository;
     private final InvestmentMapper investmentMapper;
+    private final BrapiClient brapiClient;
 
     public InvestmentService(
             InvestmentRepository investmentRepository,
             PortfolioRepository portfolioRepository,
             AssetRepository assetRepository,
-            InvestmentMapper investmentMapper
+            InvestmentMapper investmentMapper, BrapiClient brapiClient
     ) {
         this.investmentRepository = investmentRepository;
         this.portfolioRepository = portfolioRepository;
         this.assetRepository = assetRepository;
         this.investmentMapper = investmentMapper;
+        this.brapiClient = brapiClient;
+    }
+    public InvestmentWithPnLResponse getInvestmentWithPnL(Long portfolioId, Long investmentId) {
+        Investment investment = investmentRepository.findById(investmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Investment não encontrado"));
+
+        Asset asset = investment.getAsset();
+        AssetQuoteDTO quote = brapiClient.fetchAssetQuote(asset.getTicker());
+        BigDecimal currentPrice = quote.price();
+
+        return new InvestmentWithPnLResponse(
+                investment.getId(),
+                asset.getTicker(),
+                investment.getQuantity(),
+                investment.getAveragePrice(),
+                currentPrice,
+                investment.calculateTotalInvested(),
+                investment.calculateMarketValue(currentPrice),
+                investment.calculateProfitLoss(currentPrice),
+                investment.calculateProfitLossPercent(currentPrice)
+        );
     }
 
     public Page<InvestmentResponse> findAllByPortfolio(Long portfolioId, Pageable pageable) {
