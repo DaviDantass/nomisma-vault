@@ -6,14 +6,17 @@ import jakarta.validation.constraints.DecimalMin;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.davidantasdev.nomismavault.entity.enums.TransactionType;
+
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @Table(name = "investments", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"portfolio_id", "asset_id"})
+        @UniqueConstraint(columnNames = { "portfolio_id", "asset_id" })
 })
 public class Investment {
 
@@ -59,7 +62,8 @@ public class Investment {
     public Investment() {
     }
 
-    public Investment(Portfolio portfolio, Asset asset, BigDecimal quantity, BigDecimal averagePrice, LocalDate purchaseDate) {
+    public Investment(Portfolio portfolio, Asset asset, BigDecimal quantity, BigDecimal averagePrice,
+            LocalDate purchaseDate) {
         this.portfolio = portfolio;
         this.asset = asset;
         this.quantity = quantity;
@@ -139,6 +143,44 @@ public class Investment {
         this.updatedAt = updatedAt;
     }
 
+    public void updatePosition(TransactionType type, BigDecimal transactionQuantity, BigDecimal transactionPrice) {
+        if (type == TransactionType.BUY) {
+            BigDecimal currentTotal = this.quantity.multiply(this.averagePrice);
+            BigDecimal newTotal = transactionQuantity.multiply(transactionPrice);
+            BigDecimal newQuantity = this.quantity.add(transactionQuantity);
+
+            this.averagePrice = currentTotal.add(newTotal)
+                    .divide(newQuantity, 2, RoundingMode.HALF_UP);
+            this.quantity = newQuantity;
+        } else if (type == TransactionType.SELL) {
+            this.quantity = this.quantity.subtract(transactionQuantity);
+        }
+    }
+
+    public boolean hasEnoughQuantity(BigDecimal sellQuantity) {
+        return this.quantity.compareTo(sellQuantity) >= 0;
+    }
+
+    public BigDecimal calculateProfitLoss(BigDecimal currentPrice) {
+        return currentPrice.subtract(this.averagePrice).multiply(this.quantity);
+    }
+
+    public BigDecimal calculateProfitLossPercent(BigDecimal currentPrice) {
+        if (this.averagePrice.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+        return currentPrice.subtract(this.averagePrice)
+                .divide(this.averagePrice, 4, RoundingMode.HALF_UP)
+                .multiply(new BigDecimal("100"));
+    }
+
+    public BigDecimal calculateMarketValue(BigDecimal currentPrice) {
+        return currentPrice.multiply(this.quantity);
+    }
+
+    public BigDecimal calculateTotalInvested() {
+        return this.averagePrice.multiply(this.quantity);
+    }
     @Override
     public String toString() {
         return "Investment{" +
@@ -152,10 +194,13 @@ public class Investment {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Investment that = (Investment) o;
-        return Objects.equals(id, that.id) && Objects.equals(portfolio, that.portfolio) && Objects.equals(asset, that.asset);
+        return Objects.equals(id, that.id) && Objects.equals(portfolio, that.portfolio)
+                && Objects.equals(asset, that.asset);
     }
 
     @Override

@@ -91,7 +91,6 @@ public class PriceHistoryService {
         Asset asset = assetRepository.findById(request.assetId())
                 .orElseThrow(() -> new ResourceNotFoundException("Ativo não encontrado"));
 
-        // Verificar se já existe registro para o novo ativo/data (excluindo o atual)
         priceHistoryRepository.findByAssetIdAndDate(request.assetId(), request.date())
                 .ifPresent(existing -> {
                     if (!existing.getId().equals(id)) {
