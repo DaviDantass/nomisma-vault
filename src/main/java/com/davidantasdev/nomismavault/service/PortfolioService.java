@@ -13,8 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 public class PortfolioService {
 
@@ -25,19 +23,15 @@ public class PortfolioService {
     public PortfolioService(
             PortfolioRepository portfolioRepository,
             UserRepository userRepository,
-            PortfolioMapper portfolioMapper
-    ) {
+            PortfolioMapper portfolioMapper) {
         this.portfolioRepository = portfolioRepository;
         this.userRepository = userRepository;
         this.portfolioMapper = portfolioMapper;
     }
 
-
     public Page<PortfolioResponse> findAllByUser(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Usuário não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         return portfolioRepository.findAllByUser(user, pageable)
                 .map(portfolioMapper::toResponse);
@@ -45,15 +39,12 @@ public class PortfolioService {
 
     public PortfolioResponse findById(Long userId, Long portfolioId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Usuário não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         Portfolio portfolio = portfolioRepository
                 .findByIdAndUser(portfolioId, user)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado para este usuário")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Portfolio não encontrado para este usuário"));
 
         return portfolioMapper.toResponse(portfolio);
     }
@@ -61,37 +52,29 @@ public class PortfolioService {
     @Transactional
     public PortfolioResponse createPortfolio(
             PortfolioRequest request,
-            Long userId
-    ) {
+            Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Usuário não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         Portfolio portfolio = portfolioMapper.toEntity(request);
         portfolio.setUser(user);
 
         return portfolioMapper.toResponse(
-                portfolioRepository.save(portfolio)
-        );
+                portfolioRepository.save(portfolio));
     }
 
     @Transactional
     public PortfolioResponse updatePortfolio(
             Long userId,
             Long portfolioId,
-            PortfolioRequest request
-    ) {
+            PortfolioRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Usuário não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         Portfolio portfolio = portfolioRepository
                 .findByIdAndUser(portfolioId, user)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado para este usuário")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Portfolio não encontrado para este usuário"));
 
         portfolioMapper.updateEntityFromRequest(request, portfolio);
 
@@ -101,18 +84,13 @@ public class PortfolioService {
     @Transactional
     public void delete(Long userId, Long portfolioId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Usuário não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         Portfolio portfolio = portfolioRepository
                 .findByIdAndUser(portfolioId, user)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado para este usuário")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Portfolio não encontrado para este usuário"));
 
         portfolioRepository.delete(portfolio);
     }
 }
-
-
