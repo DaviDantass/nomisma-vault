@@ -3,6 +3,8 @@ package com.davidantasdev.nomismavault.controller;
 import com.davidantasdev.nomismavault.dto.request.PriceHistoryRequest;
 import com.davidantasdev.nomismavault.dto.response.PriceHistoryResponse;
 import com.davidantasdev.nomismavault.service.PriceHistoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/price-history")
+@Tag(name = "Price History", description = "Histórico de cotações dos ativos")
 public class PriceHistoryController {
 
     private final PriceHistoryService priceHistoryService;

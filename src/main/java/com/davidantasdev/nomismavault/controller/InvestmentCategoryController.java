@@ -3,6 +3,8 @@ package com.davidantasdev.nomismavault.controller;
 import com.davidantasdev.nomismavault.dto.request.InvestmentCategoryRequest;
 import com.davidantasdev.nomismavault.dto.response.InvestmentCategoryResponse;
 import com.davidantasdev.nomismavault.service.InvestmentCategoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
+@Tag(name = "Categories", description = "Categorias de investimento (Ações, FIIs, Cripto, etc)")
 public class InvestmentCategoryController {
 
     private final InvestmentCategoryService categoryService;
