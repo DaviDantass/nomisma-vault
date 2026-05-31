@@ -131,7 +131,8 @@ public class InvestmentService {
         investment.setPurchaseDate(investmentData.getPurchaseDate());
         investment.setNotes(investmentData.getNotes());
 
-        return investmentMapper.toResponse(investment);
+        Investment saved = investmentRepository.save(investment);
+        return investmentMapper.toResponse(saved);
     }
 
     @Transactional

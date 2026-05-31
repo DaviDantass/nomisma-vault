@@ -85,7 +85,8 @@ public class AssetService {
                 asset.setCurrentPrice(assetData.getCurrentPrice());
                 asset.setLastUpdate(LocalDateTime.now());
 
-                return assetMapper.toResponse(asset);
+                Asset saved = assetRepository.save(asset);
+                return assetMapper.toResponse(saved);
         }
 
         @Transactional

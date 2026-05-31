@@ -102,7 +102,8 @@ public class PriceHistoryService {
         priceHistory.setPrice(request.price());
         priceHistory.setDate(request.date());
 
-        return priceHistoryMapper.toResponse(priceHistory);
+        PriceHistory saved = priceHistoryRepository.save(priceHistory);
+        return priceHistoryMapper.toResponse(saved);
     }
 
     @Transactional
