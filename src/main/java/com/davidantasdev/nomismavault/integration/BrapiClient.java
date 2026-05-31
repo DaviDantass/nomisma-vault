@@ -23,6 +23,9 @@ public class BrapiClient {
     @Value("${brapi.api.url}")
     private String baseUrl;
 
+    @Value("${brapi.api.token:}")
+    private String apiToken;
+
     public BrapiClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -50,7 +53,7 @@ public class BrapiClient {
     }
 
     private BrapiQuote fetchQuote(String ticker) {
-        String url = baseUrl + "/quote/" + ticker;
+        String url = buildUrl(ticker);
         try {
             BrapiResponse response = restTemplate.getForObject(url, BrapiResponse.class);
 
@@ -64,5 +67,13 @@ public class BrapiClient {
             log.error("Failed to fetch quote for {}: ", ticker, e);
             throw new BusinessException("Failed to fetch quote for ticker: " + ticker);
         }
+    }
+
+    private String buildUrl(String ticker) {
+        String url = baseUrl + "/quote/" + ticker;
+        if (apiToken != null && !apiToken.isBlank()) {
+            url += "?token=" + apiToken;
+        }
+        return url;
     }
 }
