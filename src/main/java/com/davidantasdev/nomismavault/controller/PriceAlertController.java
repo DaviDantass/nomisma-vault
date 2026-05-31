@@ -2,9 +2,8 @@ package com.davidantasdev.nomismavault.controller;
 
 import com.davidantasdev.nomismavault.dto.request.PriceAlertRequest;
 import com.davidantasdev.nomismavault.dto.response.PriceAlertResponse;
+import com.davidantasdev.nomismavault.security.AuthenticatedUserProvider;
 import com.davidantasdev.nomismavault.service.PriceAlertService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -16,20 +15,24 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("/api/users/{userId}/alerts")
+@RequestMapping("/api/alerts")
 @Tag(name = "Price Alerts", description = "Alertas de preço para ativos")
 public class PriceAlertController {
 
         private final PriceAlertService priceAlertService;
+        private final AuthenticatedUserProvider authenticatedUserProvider;
 
-        public PriceAlertController(PriceAlertService priceAlertService) {
+        public PriceAlertController(
+                        PriceAlertService priceAlertService,
+                        AuthenticatedUserProvider authenticatedUserProvider) {
                 this.priceAlertService = priceAlertService;
+                this.authenticatedUserProvider = authenticatedUserProvider;
         }
 
         @GetMapping
         public ResponseEntity<Page<PriceAlertResponse>> findAllAlertsByUser(
-                        @PathVariable Long userId,
                         Pageable pageable) {
+                Long userId = authenticatedUserProvider.getCurrentUserId();
 
                 return ResponseEntity.ok(
                                 priceAlertService.findAllByUser(userId, pageable));
@@ -37,8 +40,8 @@ public class PriceAlertController {
 
         @GetMapping("/active")
         public ResponseEntity<Page<PriceAlertResponse>> findActiveAlertsByUser(
-                        @PathVariable Long userId,
                         Pageable pageable) {
+                Long userId = authenticatedUserProvider.getCurrentUserId();
 
                 return ResponseEntity.ok(
                                 priceAlertService.findActiveByUser(userId, pageable));
@@ -46,8 +49,8 @@ public class PriceAlertController {
 
         @GetMapping("/{alertId}")
         public ResponseEntity<PriceAlertResponse> findAlertById(
-                        @PathVariable Long userId,
                         @PathVariable Long alertId) {
+                Long userId = authenticatedUserProvider.getCurrentUserId();
 
                 return ResponseEntity.ok(
                                 priceAlertService.findById(userId, alertId));
@@ -55,8 +58,8 @@ public class PriceAlertController {
 
         @PostMapping
         public ResponseEntity<PriceAlertResponse> createAlert(
-                        @PathVariable Long userId,
                         @Valid @RequestBody PriceAlertRequest request) {
+                Long userId = authenticatedUserProvider.getCurrentUserId();
 
                 return ResponseEntity
                                 .status(HttpStatus.CREATED)
@@ -65,8 +68,8 @@ public class PriceAlertController {
 
         @PatchMapping("/{alertId}/deactivate")
         public ResponseEntity<PriceAlertResponse> deactivateAlert(
-                        @PathVariable Long userId,
                         @PathVariable Long alertId) {
+                Long userId = authenticatedUserProvider.getCurrentUserId();
 
                 return ResponseEntity.ok(
                                 priceAlertService.deactivate(userId, alertId));
@@ -74,9 +77,9 @@ public class PriceAlertController {
 
         @PatchMapping("/{alertId}/price")
         public ResponseEntity<PriceAlertResponse> updateAlertPrice(
-                        @PathVariable Long userId,
                         @PathVariable Long alertId,
                         @RequestParam BigDecimal newPrice) {
+                Long userId = authenticatedUserProvider.getCurrentUserId();
 
                 return ResponseEntity.ok(
                                 priceAlertService.updatePrice(userId, alertId, newPrice));
@@ -85,8 +88,8 @@ public class PriceAlertController {
         @DeleteMapping("/{alertId}")
         @ResponseStatus(HttpStatus.NO_CONTENT)
         public void deleteAlert(
-                        @PathVariable Long userId,
                         @PathVariable Long alertId) {
+                Long userId = authenticatedUserProvider.getCurrentUserId();
 
                 priceAlertService.delete(userId, alertId);
         }

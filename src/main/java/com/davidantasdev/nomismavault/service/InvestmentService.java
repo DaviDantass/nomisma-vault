@@ -9,13 +9,14 @@ import com.davidantasdev.nomismavault.entity.Investment;
 import com.davidantasdev.nomismavault.entity.Portfolio;
 import com.davidantasdev.nomismavault.exception.ResourceNotFoundException;
 import com.davidantasdev.nomismavault.integration.BrapiClient;
-import com.davidantasdev.nomismavault.mapper.AssetMapper;
 import com.davidantasdev.nomismavault.mapper.InvestmentMapper;
 import com.davidantasdev.nomismavault.repository.AssetRepository;
 import com.davidantasdev.nomismavault.repository.InvestmentRepository;
 import com.davidantasdev.nomismavault.repository.PortfolioRepository;
+import com.davidantasdev.nomismavault.security.AuthenticatedUserProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,21 +29,26 @@ public class InvestmentService {
     private final AssetRepository assetRepository;
     private final InvestmentMapper investmentMapper;
     private final BrapiClient brapiClient;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
     public InvestmentService(
             InvestmentRepository investmentRepository,
             PortfolioRepository portfolioRepository,
             AssetRepository assetRepository,
-            InvestmentMapper investmentMapper, BrapiClient brapiClient
+            InvestmentMapper investmentMapper,
+            BrapiClient brapiClient,
+            AuthenticatedUserProvider authenticatedUserProvider
     ) {
         this.investmentRepository = investmentRepository;
         this.portfolioRepository = portfolioRepository;
         this.assetRepository = assetRepository;
         this.investmentMapper = investmentMapper;
         this.brapiClient = brapiClient;
+        this.authenticatedUserProvider = authenticatedUserProvider;
     }
     public InvestmentWithPnLResponse getInvestmentWithPnL(Long portfolioId, Long investmentId) {
-        Investment investment = investmentRepository.findById(investmentId)
+        Portfolio portfolio = getPortfolioAndValidateOwnership(portfolioId);
+        Investment investment = investmentRepository.findByIdAndPortfolio(investmentId, portfolio)
                 .orElseThrow(() -> new ResourceNotFoundException("Investment não encontrado"));
 
         Asset asset = investment.getAsset();
@@ -63,20 +69,14 @@ public class InvestmentService {
     }
 
     public Page<InvestmentResponse> findAllByPortfolio(Long portfolioId, Pageable pageable) {
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado")
-                );
+        Portfolio portfolio = getPortfolioAndValidateOwnership(portfolioId);
 
         return investmentRepository.findAllByPortfolio(portfolio, pageable)
                 .map(investmentMapper::toResponse);
     }
 
     public InvestmentResponse findById(Long portfolioId, Long investmentId) {
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado")
-                );
+        Portfolio portfolio = getPortfolioAndValidateOwnership(portfolioId);
 
         Investment investment = investmentRepository.findByIdAndPortfolio(investmentId, portfolio)
                 .orElseThrow(() ->
@@ -88,10 +88,7 @@ public class InvestmentService {
 
     @Transactional
     public InvestmentResponse create(Long portfolioId, Long assetId, InvestmentRequest request) {
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado")
-                );
+        Portfolio portfolio = getPortfolioAndValidateOwnership(portfolioId);
 
         Asset asset = assetRepository.findById(assetId)
                 .orElseThrow(() ->
@@ -107,10 +104,7 @@ public class InvestmentService {
 
     @Transactional
     public InvestmentResponse update(Long portfolioId, Long investmentId, Long assetId, InvestmentRequest request) {
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado")
-                );
+        Portfolio portfolio = getPortfolioAndValidateOwnership(portfolioId);
 
         Investment investment = investmentRepository.findByIdAndPortfolio(investmentId, portfolio)
                 .orElseThrow(() ->
@@ -137,10 +131,7 @@ public class InvestmentService {
 
     @Transactional
     public void delete(Long portfolioId, Long investmentId) {
-        Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado")
-                );
+        Portfolio portfolio = getPortfolioAndValidateOwnership(portfolioId);
 
         Investment investment = investmentRepository.findByIdAndPortfolio(investmentId, portfolio)
                 .orElseThrow(() ->
@@ -148,5 +139,17 @@ public class InvestmentService {
                 );
 
         investmentRepository.delete(investment);
+    }
+
+    private Portfolio getPortfolioAndValidateOwnership(Long portfolioId) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Portfolio não encontrado")
+                );
+        Long currentUserId = authenticatedUserProvider.getCurrentUserId();
+        if (!portfolio.getUser().getId().equals(currentUserId)) {
+            throw new AccessDeniedException("Access denied: portfolio does not belong to the authenticated user");
+        }
+        return portfolio;
     }
 }

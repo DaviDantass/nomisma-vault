@@ -14,8 +14,10 @@ import com.davidantasdev.nomismavault.repository.AssetRepository;
 import com.davidantasdev.nomismavault.repository.InvestmentRepository;
 import com.davidantasdev.nomismavault.repository.PortfolioRepository;
 import com.davidantasdev.nomismavault.repository.TransactionRepository;
+import com.davidantasdev.nomismavault.security.AuthenticatedUserProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,31 +31,32 @@ public class TransactionService {
         private final AssetRepository assetRepository;
         private final InvestmentRepository investmentRepository;
         private final TransactionMapper transactionMapper;
+        private final AuthenticatedUserProvider authenticatedUserProvider;
 
         public TransactionService(
                         TransactionRepository transactionRepository,
                         PortfolioRepository portfolioRepository,
                         AssetRepository assetRepository,
                         InvestmentRepository investmentRepository,
-                        TransactionMapper transactionMapper) {
+                        TransactionMapper transactionMapper,
+                        AuthenticatedUserProvider authenticatedUserProvider) {
                 this.transactionRepository = transactionRepository;
                 this.portfolioRepository = portfolioRepository;
                 this.assetRepository = assetRepository;
                 this.investmentRepository = investmentRepository;
                 this.transactionMapper = transactionMapper;
+                this.authenticatedUserProvider = authenticatedUserProvider;
         }
 
         public Page<TransactionResponse> findAllByPortfolio(Long portfolioId, Pageable pageable) {
-                Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found"));
+                Portfolio portfolio = getPortfolioAndValidateOwnership(portfolioId);
 
                 return transactionRepository.findAllByPortfolio(portfolio, pageable)
                                 .map(transactionMapper::toResponse);
         }
 
         public TransactionResponse findById(Long portfolioId, Long transactionId) {
-                Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found"));
+                Portfolio portfolio = getPortfolioAndValidateOwnership(portfolioId);
 
                 Transaction transaction = transactionRepository.findByIdAndPortfolio(transactionId, portfolio)
                                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -64,8 +67,7 @@ public class TransactionService {
 
         @Transactional
         public TransactionResponse create(Long portfolioId, TransactionRequest request) {
-                Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found"));
+                Portfolio portfolio = getPortfolioAndValidateOwnership(portfolioId);
                 Asset asset = assetRepository.findById(request.assetId())
                                 .orElseThrow(() -> new ResourceNotFoundException("Asset not found"));
 
@@ -111,8 +113,7 @@ public class TransactionService {
 
         @Transactional
         public void delete(Long portfolioId, Long transactionId) {
-                Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found"));
+                Portfolio portfolio = getPortfolioAndValidateOwnership(portfolioId);
 
                 Transaction transaction = transactionRepository.findByIdAndPortfolio(transactionId, portfolio)
                                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -126,10 +127,21 @@ public class TransactionService {
                         LocalDate start,
                         LocalDate end,
                         Pageable pageable) {
+                Portfolio portfolio = getPortfolioAndValidateOwnership(portfolioId);
                 Page<Transaction> transactions = transactionRepository
-                                .findByPortfolioIdAndTransactionDateBetween(portfolioId, start, end, pageable);
+                                .findByPortfolioIdAndTransactionDateBetween(portfolio.getId(), start, end, pageable);
 
                 return transactions.map(transactionMapper::toResponse);
+        }
+
+        private Portfolio getPortfolioAndValidateOwnership(Long portfolioId) {
+                Portfolio portfolio = portfolioRepository.findById(portfolioId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found"));
+                Long currentUserId = authenticatedUserProvider.getCurrentUserId();
+                if (!portfolio.getUser().getId().equals(currentUserId)) {
+                        throw new AccessDeniedException("Access denied: portfolio does not belong to the authenticated user");
+                }
+                return portfolio;
         }
 
 }
