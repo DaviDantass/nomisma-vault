@@ -11,6 +11,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -72,7 +74,7 @@ public class BrapiClient {
     private String buildUrl(String ticker) {
         String url = baseUrl + "/quote/" + ticker;
         if (apiToken != null && !apiToken.isBlank()) {
-            url += "?token=" + apiToken;
+            url += "?token=" + URLEncoder.encode(apiToken, StandardCharsets.UTF_8);
         }
         return url;
     }
