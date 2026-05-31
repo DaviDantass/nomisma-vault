@@ -8,9 +8,9 @@ services:
     image: postgres:15-alpine
     container_name: assetapi-postgres
     environment:
-      POSTGRES_DB: assetapi
-      POSTGRES_USER: assetapi_user
-      POSTGRES_PASSWORD: assetapi_pass
+      POSTGRES_DB: nomismavault
+      POSTGRES_USER: nomismavault_user
+      POSTGRES_PASSWORD: nomismavault_pass
     ports:
       - "5432:5432"
     volumes:
@@ -47,7 +47,7 @@ services:
       SPRING_FLYWAY_ENABLED: "true"
       
       # JWT (use secrets in production!)
-      JWT_SECRET: MYINVEST_SECRET_KEY_SUPER_SECURE_2025
+      JWT_SECRET: ${JWT_SECRET:NOMISMAVAULT_SECRET_KEY_CHANGE_ME_IN_PRODUCTION}
       JWT_EXPIRATION: 86400000
       
       # Brapi API
