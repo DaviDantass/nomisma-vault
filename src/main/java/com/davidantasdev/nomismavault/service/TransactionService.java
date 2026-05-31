@@ -119,6 +119,22 @@ public class TransactionService {
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Transaction not found for this portfolio"));
 
+                investmentRepository.findByPortfolioAndAsset(portfolio, transaction.getAsset())
+                                .ifPresent(investment -> {
+                                        if (transaction.getType() == TransactionType.BUY) {
+                                                BigDecimal newQty = investment.getQuantity().subtract(transaction.getQuantity());
+                                                if (newQty.compareTo(BigDecimal.ZERO) <= 0) {
+                                                        investmentRepository.delete(investment);
+                                                } else {
+                                                        investment.setQuantity(newQty);
+                                                        investmentRepository.save(investment);
+                                                }
+                                        } else if (transaction.getType() == TransactionType.SELL) {
+                                                investment.setQuantity(investment.getQuantity().add(transaction.getQuantity()));
+                                                investmentRepository.save(investment);
+                                        }
+                                });
+
                 transactionRepository.delete(transaction);
         }
 
