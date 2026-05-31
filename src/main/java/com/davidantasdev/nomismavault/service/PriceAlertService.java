@@ -77,7 +77,8 @@ public class PriceAlertService {
                 .orElseThrow(() -> new ResourceNotFoundException("Alert not found"));
 
         alert.setIsActive(false);
-        return priceAlertMapper.toResponse(alert);
+        PriceAlert saved = priceAlertRepository.save(alert);
+        return priceAlertMapper.toResponse(saved);
     }
     @Transactional
     public void delete(Long userId, Long alertId) {
