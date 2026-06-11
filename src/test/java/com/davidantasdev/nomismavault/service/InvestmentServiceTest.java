@@ -1,29 +1,50 @@
 package com.davidantasdev.nomismavault.service;
 
-import com.davidantasdev.nomismavault.integration.BrapiClient;
-import com.davidantasdev.nomismavault.dto.response.*;
+import com.davidantasdev.nomismavault.dto.response.AssetQuoteDTO;
+import com.davidantasdev.nomismavault.dto.response.InvestmentWithPnLResponse;
 import com.davidantasdev.nomismavault.entity.Asset;
 import com.davidantasdev.nomismavault.entity.Investment;
 import com.davidantasdev.nomismavault.entity.InvestmentCategory;
+import com.davidantasdev.nomismavault.entity.Portfolio;
 import com.davidantasdev.nomismavault.entity.enums.RiskLevel;
 import com.davidantasdev.nomismavault.exception.ResourceNotFoundException;
+import com.davidantasdev.nomismavault.integration.BrapiClient;
+import com.davidantasdev.nomismavault.mapper.InvestmentMapper;
+import com.davidantasdev.nomismavault.repository.AssetRepository;
 import com.davidantasdev.nomismavault.repository.InvestmentRepository;
-import org.junit.jupiter.api.BeforeEach;
+import com.davidantasdev.nomismavault.repository.PortfolioRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class InvestmentServiceTest {
 
     @Mock
     private InvestmentRepository investmentRepository;
+
+    @Mock
+    private PortfolioRepository portfolioRepository;
+
+    @Mock
+    private AssetRepository assetRepository;
+
+    @Mock
+    private InvestmentMapper investmentMapper;
 
     @Mock
     private BrapiClient brapiClient;
@@ -31,21 +52,13 @@ class InvestmentServiceTest {
     @InjectMocks
     private InvestmentService investmentService;
 
-    @BeforeEach
-    void setup() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
-    void testGetInvestmentWithPnL_Success() {
+    void getInvestmentWithPnLReturnsCalculatedPositionForPortfolioInvestment() {
         Long portfolioId = 1L;
         Long investmentId = 100L;
+        Portfolio portfolio = new Portfolio();
 
-        InvestmentCategory category = new InvestmentCategory(
-                "Ações",
-                "Investimentos em ações de empresas",
-                RiskLevel.HIGH);
-
+        InvestmentCategory category = new InvestmentCategory("ACOES", "Acoes", RiskLevel.HIGH);
         Asset asset = new Asset("AAPL", "Apple Inc.", category);
 
         Investment investment = mock(Investment.class);
@@ -58,7 +71,8 @@ class InvestmentServiceTest {
         when(investment.calculateProfitLoss(any())).thenReturn(new BigDecimal("100"));
         when(investment.calculateProfitLossPercent(any())).thenReturn(new BigDecimal("6.67"));
 
-        when(investmentRepository.findById(investmentId)).thenReturn(Optional.of(investment));
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
+        when(investmentRepository.findByIdAndPortfolio(investmentId, portfolio)).thenReturn(Optional.of(investment));
 
         AssetQuoteDTO quote = mock(AssetQuoteDTO.class);
         when(quote.price()).thenReturn(new BigDecimal("160"));
@@ -77,21 +91,25 @@ class InvestmentServiceTest {
         assertEquals(new BigDecimal("100"), response.profitLoss());
         assertEquals(new BigDecimal("6.67"), response.profitLossPercent());
 
-        verify(investmentRepository).findById(investmentId);
+        verify(portfolioRepository).findById(portfolioId);
+        verify(investmentRepository).findByIdAndPortfolio(investmentId, portfolio);
         verify(brapiClient).fetchAssetQuote("AAPL");
     }
 
     @Test
-    void testGetInvestmentWithPnL_NotFound() {
+    void getInvestmentWithPnLRejectsInvestmentFromAnotherPortfolio() {
+        Long portfolioId = 1L;
         Long investmentId = 999L;
-        when(investmentRepository.findById(investmentId)).thenReturn(Optional.empty());
+        Portfolio portfolio = new Portfolio();
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            investmentService.getInvestmentWithPnL(1L, investmentId);
-        });
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
+        when(investmentRepository.findByIdAndPortfolio(investmentId, portfolio)).thenReturn(Optional.empty());
 
-        assertEquals("Investment não encontrado", exception.getMessage());
-        verify(investmentRepository).findById(investmentId);
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> investmentService.getInvestmentWithPnL(portfolioId, investmentId));
+
+        assertEquals("Investment not found for this portfolio", exception.getMessage());
+        verify(investmentRepository).findByIdAndPortfolio(investmentId, portfolio);
         verifyNoInteractions(brapiClient);
     }
 }

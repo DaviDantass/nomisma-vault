@@ -130,6 +130,26 @@ class TransactionServiceTest {
         verify(transactionRepository, never()).save(any());
     }
 
+    @Test
+    void sellEntirePositionDeletesOpenInvestment() {
+        TransactionRequest request = request(TransactionType.SELL, "10", "25.00", null);
+        Investment investment = new Investment(portfolio, asset, new BigDecimal("10"), new BigDecimal("20.00"),
+                LocalDate.now().minusDays(10));
+
+        when(portfolioRepository.findById(1L)).thenReturn(Optional.of(portfolio));
+        when(assetRepository.findById(10L)).thenReturn(Optional.of(asset));
+        when(investmentRepository.findByPortfolioAndAsset(portfolio, asset)).thenReturn(Optional.of(investment));
+        when(transactionMapper.toEntity(request)).thenReturn(new Transaction());
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(transactionMapper.toResponse(any(Transaction.class))).thenReturn(response(TransactionType.SELL, "250.00"));
+
+        transactionService.create(1L, request);
+
+        assertEquals(BigDecimal.ZERO, investment.getQuantity());
+        verify(investmentRepository).delete(investment);
+        verify(investmentRepository, never()).save(investment);
+    }
+
     private TransactionRequest request(TransactionType type, String quantity, String price, String fees) {
         return new TransactionRequest(
                 1L,

@@ -26,7 +26,9 @@ O objetivo do repositorio e demonstrar uma API Spring Boot pequena, organizada p
 - CRUD de carteiras por usuario.
 - Registro de transacoes de compra e venda.
 - Atualizacao automatica da posicao ao registrar transacoes.
+- Fechamento automatico da posicao quando a venda zera a quantidade.
 - Bloqueio de venda acima da quantidade disponivel.
+- Resumo financeiro da carteira com total investido, valor atual e lucro/prejuizo.
 - Listagem e filtro de transacoes por periodo.
 - Calculo de P&L de uma posicao usando cotacao externa da BRAPI.
 - Alertas de preco e schedulers simples para monitoramento.
@@ -113,7 +115,9 @@ Os testes usam perfil `test` com H2 em memoria. A suite cobre:
 - criptografia de senha no cadastro;
 - compra criando/atualizando posicao;
 - venda reduzindo posicao;
+- venda total encerrando posicao aberta;
 - erro esperado ao vender mais do que a quantidade disponivel;
+- resumo financeiro de carteira;
 - calculo de P&L de investimento com cotacao mockada.
 
 ## Exemplos de endpoints
@@ -242,9 +246,33 @@ Authorization: Bearer <token>
 
 Esse endpoint consulta cotacao na BRAPI. Sem internet ou sem dado para o ticker, a API retorna erro de negocio.
 
+### Consultar resumo da carteira
+
+```http
+GET /api/users/1/portfolios/1/summary
+Authorization: Bearer <token>
+```
+
+Resposta esperada:
+
+```json
+{
+  "portfolioId": 1,
+  "portfolioName": "Carteira principal",
+  "positionsCount": 2,
+  "totalInvested": 400.00,
+  "currentValue": 450.00,
+  "profitLoss": 50.00,
+  "profitLossPercent": 12.5000
+}
+```
+
+O resumo usa o `currentPrice` salvo no ativo. Quando o ativo ainda nao tem preco atual, usa o preco medio da posicao como fallback.
+
 ## Observacoes tecnicas
 
 - O fluxo principal recomendado e registrar posicoes via transacoes. O CRUD direto de investimentos ainda existe, mas deve ser usado com cuidado porque pode criar posicoes sem historico financeiro.
+- Uma venda que zera a quantidade remove a posicao aberta da carteira, mantendo a transacao no historico.
 - Excluir uma transacao nao recalcula a posicao. Para um produto real, o ideal seria implementar recalculo por historico ou bloquear delecao de transacoes liquidadas.
 - Os schedulers de preco/alerta sao aceitaveis no monolito atual, mas nao devem virar fila ou mensageria enquanto o projeto for pequeno.
 - O README antigo prometia cobertura e recursos alem do que estava validado. Esta versao documenta o comportamento que o projeto realmente entrega.

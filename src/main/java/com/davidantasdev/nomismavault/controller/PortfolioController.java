@@ -2,6 +2,7 @@ package com.davidantasdev.nomismavault.controller;
 
 import com.davidantasdev.nomismavault.dto.request.PortfolioRequest;
 import com.davidantasdev.nomismavault.dto.response.PortfolioResponse;
+import com.davidantasdev.nomismavault.dto.response.PortfolioSummaryResponse;
 import com.davidantasdev.nomismavault.service.PortfolioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,6 +43,15 @@ public class PortfolioController {
 
                 return ResponseEntity.ok(
                                 portfolioService.findById(userId, portfolioId));
+        }
+
+        @GetMapping("/{portfolioId}/summary")
+        public ResponseEntity<PortfolioSummaryResponse> getPortfolioSummary(
+                        @PathVariable Long userId,
+                        @PathVariable Long portfolioId) {
+
+                return ResponseEntity.ok(
+                                portfolioService.getSummary(userId, portfolioId));
         }
 
         @PostMapping

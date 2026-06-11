@@ -9,7 +9,6 @@ import com.davidantasdev.nomismavault.entity.Investment;
 import com.davidantasdev.nomismavault.entity.Portfolio;
 import com.davidantasdev.nomismavault.exception.ResourceNotFoundException;
 import com.davidantasdev.nomismavault.integration.BrapiClient;
-import com.davidantasdev.nomismavault.mapper.AssetMapper;
 import com.davidantasdev.nomismavault.mapper.InvestmentMapper;
 import com.davidantasdev.nomismavault.repository.AssetRepository;
 import com.davidantasdev.nomismavault.repository.InvestmentRepository;
@@ -33,17 +32,21 @@ public class InvestmentService {
             InvestmentRepository investmentRepository,
             PortfolioRepository portfolioRepository,
             AssetRepository assetRepository,
-            InvestmentMapper investmentMapper, BrapiClient brapiClient
-    ) {
+            InvestmentMapper investmentMapper,
+            BrapiClient brapiClient) {
         this.investmentRepository = investmentRepository;
         this.portfolioRepository = portfolioRepository;
         this.assetRepository = assetRepository;
         this.investmentMapper = investmentMapper;
         this.brapiClient = brapiClient;
     }
+
     public InvestmentWithPnLResponse getInvestmentWithPnL(Long portfolioId, Long investmentId) {
-        Investment investment = investmentRepository.findById(investmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Investment não encontrado"));
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found"));
+
+        Investment investment = investmentRepository.findByIdAndPortfolio(investmentId, portfolio)
+                .orElseThrow(() -> new ResourceNotFoundException("Investment not found for this portfolio"));
 
         Asset asset = investment.getAsset();
         AssetQuoteDTO quote = brapiClient.fetchAssetQuote(asset.getTicker());
@@ -58,15 +61,12 @@ public class InvestmentService {
                 investment.calculateTotalInvested(),
                 investment.calculateMarketValue(currentPrice),
                 investment.calculateProfitLoss(currentPrice),
-                investment.calculateProfitLossPercent(currentPrice)
-        );
+                investment.calculateProfitLossPercent(currentPrice));
     }
 
     public Page<InvestmentResponse> findAllByPortfolio(Long portfolioId, Pageable pageable) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found"));
 
         return investmentRepository.findAllByPortfolio(portfolio, pageable)
                 .map(investmentMapper::toResponse);
@@ -74,29 +74,21 @@ public class InvestmentService {
 
     public InvestmentResponse findById(Long portfolioId, Long investmentId) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found"));
 
         Investment investment = investmentRepository.findByIdAndPortfolio(investmentId, portfolio)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Investment não encontrado para este portfolio")
-                );
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Investment not found for this portfolio"));
+
         return investmentMapper.toResponse(investment);
     }
 
     @Transactional
     public InvestmentResponse create(Long portfolioId, Long assetId, InvestmentRequest request) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found"));
 
         Asset asset = assetRepository.findById(assetId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Asset não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Asset not found"));
 
         Investment investment = investmentMapper.toEntity(request);
         investment.setPortfolio(portfolio);
@@ -108,23 +100,16 @@ public class InvestmentService {
     @Transactional
     public InvestmentResponse update(Long portfolioId, Long investmentId, Long assetId, InvestmentRequest request) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found"));
 
         Investment investment = investmentRepository.findByIdAndPortfolio(investmentId, portfolio)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Investment não encontrado para este portfolio")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Investment not found for this portfolio"));
 
         Asset asset = assetRepository.findById(assetId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Asset não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Asset not found"));
 
         Investment investmentData = investmentMapper.toEntity(request);
-        
-        // Atualizar campos
+
         investment.setAsset(asset);
         investment.setQuantity(investmentData.getQuantity());
         investment.setAveragePrice(investmentData.getAveragePrice());
@@ -137,14 +122,10 @@ public class InvestmentService {
     @Transactional
     public void delete(Long portfolioId, Long investmentId) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Portfolio não encontrado")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found"));
 
         Investment investment = investmentRepository.findByIdAndPortfolio(investmentId, portfolio)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Investment não encontrado para este portfolio")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Investment not found for this portfolio"));
 
         investmentRepository.delete(investment);
     }

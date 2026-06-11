@@ -81,7 +81,11 @@ public class TransactionService {
                 }
 
                 investment.updatePosition(request.type(), request.quantity(), request.price());
-                investmentRepository.save(investment);
+                if (investment.getQuantity().compareTo(BigDecimal.ZERO) == 0) {
+                        investmentRepository.delete(investment);
+                } else {
+                        investmentRepository.save(investment);
+                }
 
                 Transaction transaction = transactionMapper.toEntity(request);
                 transaction.setPortfolio(portfolio);
