@@ -121,6 +121,37 @@ Os testes usam perfil `test` com H2 em memoria. A suite cobre:
 - resumo financeiro de carteira;
 - calculo de P&L de investimento com cotacao mockada.
 
+## Deploy no Render
+
+O projeto esta pronto para deploy no Render via Docker. O arquivo `render.yaml` define o servico web, health check em `/health` e variaveis esperadas.
+
+Passos:
+
+1. Crie um PostgreSQL no Render.
+2. Crie um Web Service a partir deste repositorio usando Docker.
+3. Configure as variaveis abaixo no servico web.
+
+Variaveis obrigatorias no Render:
+
+| Variavel | Observacao |
+| --- | --- |
+| `SPRING_DATASOURCE_URL` | Use formato JDBC: `jdbc:postgresql://host:5432/database` |
+| `SPRING_DATASOURCE_USERNAME` | Usuario do banco |
+| `SPRING_DATASOURCE_PASSWORD` | Senha do banco |
+| `JWT_SECRET` | Chave longa e privada |
+
+Variaveis opcionais:
+
+| Variavel | Valor recomendado |
+| --- | --- |
+| `SPRING_JPA_HIBERNATE_DDL_AUTO` | `validate` |
+| `SPRING_FLYWAY_ENABLED` | `true` |
+| `SPRING_JPA_SHOW_SQL` | `false` |
+| `APP_LOG_LEVEL` | `INFO` |
+| `BRAPI_API_TOKEN` | Token da BRAPI, se necessario |
+
+O Render injeta a variavel `PORT`; a aplicacao ja usa `server.port=${PORT:8080}`.
+
 ## Exemplos de endpoints
 
 ### Health

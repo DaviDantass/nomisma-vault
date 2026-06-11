@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: nomisma-vault
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: validate
+      - key: SPRING_JPA_SHOW_SQL
+        value: "false"
+      - key: SPRING_FLYWAY_ENABLED
+        value: "true"
+      - key: APP_LOG_LEVEL
+        value: INFO
+      - key: JWT_SECRET
+        sync: false
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: BRAPI_API_TOKEN
+        sync: false
