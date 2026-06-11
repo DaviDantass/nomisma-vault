@@ -9,6 +9,7 @@ import com.davidantasdev.nomismavault.mapper.UserMapper;
 import com.davidantasdev.nomismavault.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponse findById(Long id) {
@@ -53,6 +56,7 @@ public class UserService {
         User user = userMapper.toEntity(userRequest);
         user.setEmail(email);
         user.setName(user.getName().trim());
+        user.setPassword(passwordEncoder.encode(userRequest.password()));
         User savedUser = userRepository.save(user);
         return userMapper.toResponse(savedUser);
     }
@@ -85,6 +89,9 @@ public class UserService {
         }
         if (user.getName() != null) {
             user.setName(user.getName().trim());
+        }
+        if (userRequest.password() != null && !userRequest.password().isBlank()) {
+            user.setPassword(passwordEncoder.encode(userRequest.password()));
         }
 
         return userMapper.toResponse(user);
