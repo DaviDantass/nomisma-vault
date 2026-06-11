@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/api/portfolios/{portfolioId}/transactions")
+@RequestMapping("/portfolios/{portfolioId}/transactions")
 @Tag(name = "Transactions", description = "Histórico de compras e vendas de ativos")
 public class TransactionController {
 

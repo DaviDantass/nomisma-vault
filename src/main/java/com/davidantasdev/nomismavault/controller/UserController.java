@@ -16,7 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @Validated
 @Tag(name = "Users", description = "Endpoints para gestão de usuários")
 public class UserController {

@@ -25,7 +25,8 @@ O objetivo do repositorio e demonstrar uma API Spring Boot pequena, organizada p
 - CRUD de ativos vinculados a categorias.
 - CRUD de carteiras por usuario.
 - Registro de transacoes de compra e venda.
-- Atualizacao automatica da posicao ao registrar transacoes.
+- Posicoes de investimento derivadas exclusivamente das transacoes.
+- Atualizacao automatica da posicao ao registrar compra ou venda.
 - Fechamento automatico da posicao quando a venda zera a quantidade.
 - Bloqueio de venda acima da quantidade disponivel.
 - Resumo financeiro da carteira com total investido, valor atual e lucro/prejuizo.
@@ -176,7 +177,7 @@ Content-Type: application/json
 ### Criar ativo
 
 ```http
-POST /api/assets
+POST /assets
 Authorization: Bearer <token>
 Content-Type: application/json
 
@@ -191,7 +192,7 @@ Content-Type: application/json
 ### Criar carteira
 
 ```http
-POST /api/users/1/portfolios
+POST /users/1/portfolios
 Authorization: Bearer <token>
 Content-Type: application/json
 
@@ -204,7 +205,7 @@ Content-Type: application/json
 ### Registrar compra
 
 ```http
-POST /api/portfolios/1/transactions
+POST /portfolios/1/transactions
 Authorization: Bearer <token>
 Content-Type: application/json
 
@@ -223,7 +224,7 @@ Content-Type: application/json
 ### Registrar venda
 
 ```http
-POST /api/portfolios/1/transactions
+POST /portfolios/1/transactions
 Authorization: Bearer <token>
 Content-Type: application/json
 
@@ -240,7 +241,7 @@ Content-Type: application/json
 ### Consultar P&L
 
 ```http
-GET /api/portfolios/1/investments/1/pnl
+GET /portfolios/1/investments/1/pnl
 Authorization: Bearer <token>
 ```
 
@@ -249,7 +250,7 @@ Esse endpoint consulta cotacao na BRAPI. Sem internet ou sem dado para o ticker,
 ### Consultar resumo da carteira
 
 ```http
-GET /api/users/1/portfolios/1/summary
+GET /users/1/portfolios/1/summary
 Authorization: Bearer <token>
 ```
 
@@ -271,7 +272,7 @@ O resumo usa o `currentPrice` salvo no ativo. Quando o ativo ainda nao tem preco
 
 ## Observacoes tecnicas
 
-- O fluxo principal recomendado e registrar posicoes via transacoes. O CRUD direto de investimentos ainda existe, mas deve ser usado com cuidado porque pode criar posicoes sem historico financeiro.
+- Posicoes (`Investment`) sao derivadas de transacoes. A API permite consultar posicoes e P&L, mas nao permite criar, editar ou excluir posicoes diretamente.
 - Uma venda que zera a quantidade remove a posicao aberta da carteira, mantendo a transacao no historico.
 - Excluir uma transacao nao recalcula a posicao. Para um produto real, o ideal seria implementar recalculo por historico ou bloquear delecao de transacoes liquidadas.
 - Os schedulers de preco/alerta sao aceitaveis no monolito atual, mas nao devem virar fila ou mensageria enquanto o projeto for pequeno.

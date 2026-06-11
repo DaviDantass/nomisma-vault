@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users/{userId}/portfolios")
+@RequestMapping("/users/{userId}/portfolios")
 @Tag(name = "Portfolios", description = "Gestão de carteiras de investimentos")
 public class PortfolioController {
 

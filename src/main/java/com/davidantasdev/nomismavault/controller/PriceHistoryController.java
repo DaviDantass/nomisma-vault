@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/price-history")
+@RequestMapping("/price-history")
 @Tag(name = "Price History", description = "Histórico de cotações dos ativos")
 public class PriceHistoryController {
 

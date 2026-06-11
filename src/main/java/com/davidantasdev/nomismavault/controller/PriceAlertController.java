@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("/api/users/{userId}/alerts")
+@RequestMapping("/users/{userId}/alerts")
 @Tag(name = "Price Alerts", description = "Alertas de preço para ativos")
 public class PriceAlertController {
 

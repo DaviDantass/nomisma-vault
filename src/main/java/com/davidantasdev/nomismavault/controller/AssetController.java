@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/assets")
+@RequestMapping("/assets")
 @Tag(name = "Assets", description = "Cadastro de ativos (ações, FIIs, cripto, renda fixa)")
 public class AssetController {
 
