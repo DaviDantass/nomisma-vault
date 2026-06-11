@@ -61,12 +61,12 @@ public class PortfolioService {
 
     public PortfolioSummaryResponse getSummary(Long userId, Long portfolioId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("UsuÃ¡rio nÃ£o encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Portfolio portfolio = portfolioRepository
                 .findByIdAndUser(portfolioId, user)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Portfolio nÃ£o encontrado para este usuÃ¡rio"));
+                        "Portfolio not found for this user"));
 
         List<Investment> investments = investmentRepository.findAllByPortfolio(portfolio);
 
