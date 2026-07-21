@@ -18,8 +18,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users/{userId}/portfolios")
-@Tag(name = "Portfolios", description = "Gestão de carteiras de investimentos")
-public class PortfolioController {
+@Tag(
+        name = "Portfolios",
+        description = "Gestão de carteiras"
+)public class PortfolioController {
 
         private final PortfolioService portfolioService;
 

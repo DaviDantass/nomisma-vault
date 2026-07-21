@@ -4,7 +4,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.tags.Tag;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +14,7 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
+
         return new OpenAPI()
                 .info(new Info()
                         .title("NomismaVault API")
@@ -47,16 +47,7 @@ public class SwaggerConfig {
                 .servers(List.of(
                         new Server()
                                 .url("http://localhost:8082")
-                                .description("Ambiente local")))
-                .tags(List.of(
-                        new Tag().name("Authentication").description("Login e autenticação JWT"),
-                        new Tag().name("Users").description("Gestão de usuários"),
-                        new Tag().name("Portfolios").description("Gestão de carteiras"),
-                        new Tag().name("Assets").description("Gestão de ativos financeiros"),
-                        new Tag().name("Transactions").description("Registro de compras e vendas"),
-                        new Tag().name("Positions").description("Acompanhamento de posições em carteira"),
-                        new Tag().name("Categories").description("Categorias de investimento"),
-                        new Tag().name("Price Alerts").description("Monitoramento de alertas de preço"),
-                        new Tag().name("Health").description("Status da aplicação")));
+                                .description("Ambiente local")
+                ));
     }
 }

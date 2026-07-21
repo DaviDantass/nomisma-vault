@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users")
 @Validated
-@Tag(name = "Users", description = "Endpoints para gestão de usuários")
-public class UserController {
+@Tag(
+        name = "Users",
+        description = "Gestão de usuários"
+)public class UserController {
 
     private final UserService userService;
 
