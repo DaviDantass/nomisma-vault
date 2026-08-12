@@ -8,106 +8,62 @@
 <h1 align="center">💰 NomismaVault</h1>
 
 <p align="center">
-  <strong>REST API for financial portfolio management with B3 market data integration</strong>
+  <strong>API REST para gestão de carteiras de investimentos e acompanhamento de ativos da B3.</strong>
 </p>
 
 <p align="center">
-  <a href="#-overview">Overview</a> •
-  <a href="#-features">Features</a> •
-  <a href="#-tech-stack">Tech Stack</a> •
-  <a href="#-getting-started">Getting Started</a> •
-  <a href="#-api-documentation">API</a> •
-  <a href="#-architecture">Architecture</a> •
-  <a href="#-status">Status</a> •
-  <a href="#-roadmap">Roadmap</a>
+  <a href="#-sobre">Sobre</a> •
+  <a href="#-recursos">Recursos</a> •
+  <a href="#-tecnologias">Tecnologias</a> •
+  <a href="#-como-executar">Como executar</a> •
+  <a href="#-testes">Testes</a>
 </p>
 
 ---
 
-## 📋 Overview
+## 📋 Sobre
 
-**NomismaVault** is a RESTful API for personal financial asset tracking, portfolio management, and portfolio performance monitoring.
+O **NomismaVault** é um backend para controle de investimentos pessoais. A aplicação permite organizar múltiplas carteiras, registrar compras e vendas, acompanhar posições e calcular rentabilidade com cotações obtidas pela integração com a [Brapi](https://brapi.dev/).
 
-The project was built with a focus on clean architecture, security, and maintainable backend development practices.
+O projeto demonstra uma API completa com regras de negócio, autenticação, persistência, integração externa, tarefas agendadas e ambiente conteinerizado.
 
-> *"Nomisma"* (νόμισμα) means "coin" in ancient Greek — the etymological origin of **numismatics**.
+> *Nomisma* (νόμισμα) significa “moeda” em grego antigo e está na origem da palavra **numismática**.
 
-### 🎯 Core Capabilities
+## ✨ Recursos
 
-- Multi-portfolio management with isolated user contexts
-- P&L calculation through Brapi integration
-- B3 market quote tracking
-- Automated schedulers for price updates and alerts
-- JWT-based authentication with BCrypt password encryption
-- Financial calculations such as average price, profitability, and position tracking
-- Docker-ready environment with PostgreSQL
-- API documentation with Swagger/OpenAPI
+- Cadastro e autenticação de usuários com JWT e BCrypt
+- Múltiplas carteiras isoladas por usuário
+- Registro de compras e vendas com taxas
+- Atualização automática de quantidade e preço médio
+- Cálculo de valor investido, valor de mercado e lucro ou prejuízo
+- Catálogo de ativos por categoria e nível de risco
+- Cotações de mercado por integração com a Brapi
+- Histórico de preços e alertas condicionais
+- Rotinas agendadas para atualização de preços e monitoramento de alertas
+- Paginação, ordenação e filtros por período
+- Respostas de erro padronizadas
+- Documentação interativa com Swagger/OpenAPI
 
----
+## 🛠️ Tecnologias
 
-## ✨ Features
-
-### Implemented ✅
-
-| Feature | Details |
+| Área | Tecnologia |
 |---|---|
-| **User Management** | User registration, validation, and secure authentication |
-| **Authentication** | JWT tokens, stateless sessions, and Spring Security configuration |
-| **Portfolios** | Multiple portfolios per user with pagination and sorting |
-| **Investments** | Position tracking, real-time P&L, and automatic average price calculation |
-| **Transactions** | Buy/sell history, date filtering, and fee tracking |
-| **Price Alerts** | Conditional alerts using ABOVE/BELOW rules |
-| **Asset Catalog** | Stocks, REITs, crypto, fixed income, and risk categorization |
-| **Brapi Integration** | Live market quotes, caching, and error handling |
-| **Schedulers** | Automated price updates and alert monitoring |
-| **Global Error Handling** | Standardized API error responses |
-| **Database Migrations** | Versioned schema management with Flyway |
+| Linguagem | Java 21 |
+| Framework | Spring Boot 4 |
+| Segurança | Spring Security, JWT e BCrypt |
+| Persistência | Spring Data JPA e Hibernate |
+| Banco de dados | PostgreSQL 15 e H2 para testes locais |
+| Migrações | Flyway |
+| Mapeamento | MapStruct |
+| Documentação | SpringDoc OpenAPI / Swagger UI |
+| Testes | JUnit 5 e Mockito |
+| Infraestrutura | Docker e Docker Compose |
 
-### Planned ⏳
+## 🚀 Como executar
 
-- Dashboard with aggregated portfolio metrics
-- Category diversification charts
-- Performance comparison with CDI/IPCA benchmarks
-- Comprehensive test suite with higher coverage
-- Role-based authorization
-- Rate limiting and observability
+### Com Docker
 
----
-
-## 🛠️ Tech Stack
-
-| Category | Technology | Version |
-|---|---|---|
-| **Runtime** | Java / Eclipse Temurin | 21 LTS |
-| **Framework** | Spring Boot | 4.0.1 |
-| **ORM** | Spring Data JPA + Hibernate | - |
-| **Database** | PostgreSQL | 15 |
-| **Validation** | Jakarta Bean Validation | - |
-| **Mapping** | MapStruct | 1.5.5 |
-| **Security** | Spring Security + JWT/Auth0 | 4.2.1 |
-| **API Docs** | SpringDoc OpenAPI / Swagger UI | 2.8.5 |
-| **Cache** | Spring Cache | - |
-| **DB Migrations** | Flyway | - |
-| **Container** | Docker + Docker Compose | - |
-| **Build Tool** | Maven | 3.9+ |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-You can run the project using Docker or manually with Java and PostgreSQL.
-
-- Docker and Docker Compose
-
-Or:
-
-- Java 21
-- Maven 3.9+
-- PostgreSQL 15
-
-### Quick Start with Docker
+Pré-requisito: Docker com Docker Compose.
 
 ```bash
 git clone https://github.com/davidantasdev/nomisma-vault.git
@@ -115,115 +71,59 @@ cd nomisma-vault
 docker-compose up -d
 ```
 
-The API will be available at:
+Após a inicialização:
 
-- `http://localhost:8080`
+- API: `http://localhost:8080`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - Health check: `http://localhost:8080/health`
 
-### Manual Setup with PostgreSQL
+Para consultar cotações que exigem autenticação na Brapi, defina `BRAPI_API_TOKEN` no ambiente antes de iniciar os containers.
 
-Create the database:
+### Com banco H2
+
+Pré-requisitos: Java 21 e Maven 3.9+.
+
+```powershell
+mvn spring-boot:run "-Dspring-boot.run.profiles=local"
+```
+
+Nesse modo, a API utiliza um banco em memória e fica disponível em `http://localhost:8082`.
+
+## 📚 Documentação da API
+
+Com a aplicação em execução, o Swagger UI apresenta os contratos e permite testar os endpoints de:
+
+- autenticação e usuários;
+- carteiras, investimentos e transações;
+- ativos e categorias;
+- alertas e histórico de preços.
+
+Acesse `http://localhost:8080/swagger-ui.html` no ambiente Docker ou `http://localhost:8082/swagger-ui.html` no ambiente local.
+
+## 🧪 Testes
+
+Execute a suíte automatizada com:
 
 ```bash
-createdb -U postgres nomismavault
+mvn test
 ```
 
-Run the application:
+Os testes cobrem inicialização do contexto, usuários, carteiras, investimentos, transações e alertas de preço.
 
-```powershell
-$env:SPRING_DATASOURCE_URL="jdbc:postgresql://localhost:5432/nomismavault"
-$env:SPRING_DATASOURCE_USERNAME="postgres"
-$env:SPRING_DATASOURCE_PASSWORD="your_password"
-mvnw.cmd spring-boot:run
-```
-
-Flyway will create the database tables automatically on startup.
-
-If port `8080` is already in use:
-
-```powershell
-mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--server.port=8081"
-```
-
-### Local H2 Profile
-
-For a quick run without PostgreSQL:
-
-```powershell
-mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"
-```
-
----
-
-## 📚 API Documentation
-
-After starting the application, access:
+## 🏗️ Arquitetura
 
 ```text
-http://localhost:8080/swagger-ui.html
+controller  → endpoints REST
+service     → regras de negócio
+repository  → acesso a dados
+entity      → modelo de persistência
+dto         → contratos de entrada e saída
+mapper      → conversão entre entidades e DTOs
+security    → autenticação e autorização
+integration → comunicação com a Brapi
+scheduler   → atualização de preços e alertas
 ```
 
-Main endpoint groups:
+## 📄 Licença
 
-- Authentication
-- Users
-- Portfolios
-- Assets
-- Investment categories
-- Investments
-- Transactions
-- Price alerts
-- Price history
-
----
-
-## 🧪 Tests
-
-Run the automated tests:
-
-```bash
-mvnw.cmd test
-```
-
-Current test suite covers authentication, password encryption, transaction rules, portfolio summary, P&L calculation, and Spring context loading.
-
----
-
-## 🏗️ Architecture
-
-```text
-controller  -> REST endpoints
-service     -> business rules
-repository  -> database access
-entity      -> persistence model
-dto         -> request/response contracts
-mapper      -> entity/DTO conversion
-security    -> JWT and Spring Security
-integration -> external Brapi client
-scheduler   -> price and alert routines
-```
-
----
-
-## 📌 Status
-
-The project is currently in development, but the main backend flow is functional and runnable locally with PostgreSQL or H2.
-
-Validated locally:
-
-- PostgreSQL connection
-- Flyway migrations
-- Swagger UI
-- Health check
-- Automated tests
-
----
-
-## 🗺️ Roadmap
-
-- Add more integration tests
-- Improve portfolio analytics
-- Add benchmark comparison
-- Add role-based authorization
-- Add observability and request logging
+Distribuído sob a licença MIT. Consulte [LICENSE](LICENSE) para mais informações.
