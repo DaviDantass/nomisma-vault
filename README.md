@@ -81,10 +81,10 @@ Para consultar cotações que exigem autenticação na Brapi, defina `BRAPI_API_
 
 ### Com banco H2
 
-Pré-requisitos: Java 21 e Maven 3.9+.
+Pré-requisito: Java 21. O Maven é fornecido pelo wrapper do projeto.
 
 ```powershell
-mvn spring-boot:run "-Dspring-boot.run.profiles=local"
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"
 ```
 
 Nesse modo, a API utiliza um banco em memória e fica disponível em `http://localhost:8082`.
@@ -105,7 +105,7 @@ Acesse `http://localhost:8080/swagger-ui.html` no ambiente Docker ou `http://loc
 Execute a suíte automatizada com:
 
 ```bash
-mvn test
+./mvnw test
 ```
 
 Os testes cobrem inicialização do contexto, usuários, carteiras, investimentos, transações e alertas de preço.
