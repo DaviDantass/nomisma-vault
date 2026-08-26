@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
 </p>
 
-<h1 align="center">💰 NomismaVault</h1>
+<h1 align="center">NomismaVault</h1>
 
 <p align="center">
   <strong>API REST para gestão de carteiras de investimentos e acompanhamento de ativos da B3.</strong>
