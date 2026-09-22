@@ -1,8 +1,14 @@
 HELP.md
 target/
+.env
+.env.*
+!.env.example
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+### Docker local data ###
+docker-compose.override.yml
 
 ### STS ###
 .apt_generated
@@ -31,3 +37,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Notas privadas de trabalho (humanas ou geradas por IA) ###
+/notas.md
+/refination.md
+/*.ai.md
+/*.private.md
+/private-notes/

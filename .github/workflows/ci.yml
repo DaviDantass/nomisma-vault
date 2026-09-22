@@ -1,28 +1,22 @@
 name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-permissions:
-  contents: read
-
+on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: '21'
           cache: maven
-
-      - name: Run tests
-        run: ./mvnw --batch-mode test
+      - name: Validate formatting
+        run: ./mvnw -q spotless:check
+      - name: Run unit and HTTP integration tests
+        run: ./mvnw -q test
+      - name: Verify Docker access for Testcontainers
+        run: docker info
+      - name: Validate Flyway migrations on PostgreSQL
+        run: ./mvnw -q -DrunPostgresIT=true -Dtest=PostgreSqlFlywayTest test
+      - name: Validate Docker Compose
+        run: docker compose config --quiet
