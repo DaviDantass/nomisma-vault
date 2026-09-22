@@ -1,75 +1,20 @@
-version: '3.8'
-
 services:
-  # ====================================
-  # POSTGRESQL DATABASE
-  # ====================================
   postgres:
     image: postgres:15-alpine
     container_name: nomismavault-postgres
     environment:
-      POSTGRES_DB: nomismavault
-      POSTGRES_USER: nomismavault_user
-      POSTGRES_PASSWORD: nomismavault_pass
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - nomismavault-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nomismavault_user -d nomismavault"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # ====================================
-  # SPRING BOOT BACKEND
-  # ====================================
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nomismavault-backend
-    ports:
-      - "8080:8080"
-    environment:
-      # Database
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nomismavault
-      SPRING_DATASOURCE_USERNAME: nomismavault_user
-      SPRING_DATASOURCE_PASSWORD: nomismavault_pass
-      
-      # JPA
-      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
-      SPRING_JPA_SHOW_SQL: "true"
-      
-      # Flyway
-      SPRING_FLYWAY_ENABLED: "true"
-      
-      # JWT (use secrets in production!)
-      JWT_SECRET: NOMISMAVAULT_DEV_SECRET_CHANGE_ME
-      JWT_EXPIRATION: 86400000
-      
-      # Brapi API
-      BRAPI_API_URL: https://brapi.dev/api
-      BRAPI_API_TOKEN: ${BRAPI_API_TOKEN:-}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - nomismavault-network
-    restart: unless-stopped
-
-# ====================================
-# PERSISTENT VOLUMES
-# ====================================
 volumes:
   postgres_data:
-    driver: local
-
-# ====================================
-# ISOLATED NETWORK
-# ====================================
-networks:
-  nomismavault-network:
-    driver: bridge
