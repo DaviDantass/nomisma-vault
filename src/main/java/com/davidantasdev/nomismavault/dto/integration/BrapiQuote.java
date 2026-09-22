@@ -7,6 +7,4 @@ public record BrapiQuote(
     String longName,
     BigDecimal regularMarketPrice,
     BigDecimal regularMarketChange,
-    BigDecimal regularMarketChangePercent
-) {
-}
+    BigDecimal regularMarketChangePercent) {}

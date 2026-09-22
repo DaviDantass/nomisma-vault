@@ -21,31 +21,33 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthenticationController {
 
-    private final AuthenticationManager authenticationManager;
-    private final TokenService tokenService;
-    private final UserService userService;
+  private final AuthenticationManager authenticationManager;
+  private final TokenService tokenService;
+  private final UserService userService;
 
-    public AuthenticationController(AuthenticationManager authenticationManager,
-                                    TokenService tokenService,
-                                    UserService userService) {
-        this.authenticationManager = authenticationManager;
-        this.tokenService = tokenService;
-        this.userService = userService;
-    }
+  public AuthenticationController(
+      AuthenticationManager authenticationManager,
+      TokenService tokenService,
+      UserService userService) {
+    this.authenticationManager = authenticationManager;
+    this.tokenService = tokenService;
+    this.userService = userService;
+  }
 
-    @PostMapping("/login")
-    public ResponseEntity<DataJWT> login(@RequestBody @Valid AuthenticationRequest request) {
-        var authenticationToken = new UsernamePasswordAuthenticationToken(request.email(), request.password());
-        var authentication = authenticationManager.authenticate(authenticationToken);
+  @PostMapping("/login")
+  public ResponseEntity<DataJWT> login(@RequestBody @Valid AuthenticationRequest request) {
+    var authenticationToken =
+        new UsernamePasswordAuthenticationToken(request.email(), request.password());
+    var authentication = authenticationManager.authenticate(authenticationToken);
 
-        var token = tokenService.generateToken((User) authentication.getPrincipal());
+    var token = tokenService.generateToken((User) authentication.getPrincipal());
 
-        return ResponseEntity.ok(new DataJWT(token));
-    }
+    return ResponseEntity.ok(new DataJWT(token));
+  }
 
-    @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody @Valid UserRequest request) {
-        UserResponse user = userService.createUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
-    }
+  @PostMapping("/register")
+  public ResponseEntity<UserResponse> register(@RequestBody @Valid UserRequest request) {
+    UserResponse user = userService.createUser(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(user);
+  }
 }

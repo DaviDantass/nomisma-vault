@@ -13,6 +13,4 @@ public record InvestmentResponse(
     LocalDate purchaseDate,
     String notes,
     LocalDateTime createdAt,
-    LocalDateTime updatedAt
-) {
-}
+    LocalDateTime updatedAt) {}

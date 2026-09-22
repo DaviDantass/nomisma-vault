@@ -8,6 +8,4 @@ public record AssetQuoteDTO(
     BigDecimal price,
     BigDecimal change,
     BigDecimal changePercent,
-    LocalDateTime timestamp
-) {
-}
+    LocalDateTime timestamp) {}
