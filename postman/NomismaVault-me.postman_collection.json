@@ -1,0 +1,182 @@
+{
+  "info": {
+    "name": "NomismaVault - Fluxo completo",
+    "description": "Execute as requisições na ordem apresentada. A coleção cria usuários únicos e armazena JWTs e IDs automaticamente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8082" },
+    { "key": "password", "value": "StrongPass123" },
+    { "key": "email", "value": "" },
+    { "key": "attackerEmail", "value": "" },
+    { "key": "token", "value": "" },
+    { "key": "ownerToken", "value": "" },
+    { "key": "portfolioId", "value": "" },
+    { "key": "categoryName", "value": "" },
+    { "key": "categoryId", "value": "" },
+    { "key": "assetId", "value": "" },
+    { "key": "investmentId", "value": "" },
+    { "key": "transactionId", "value": "" },
+    { "key": "alertId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 - Saúde",
+      "item": [
+        {
+          "name": "Health",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().status).to.eql('UP');"] } }],
+          "request": { "method": "GET", "url": "{{baseUrl}}/health" }
+        }
+      ]
+    },
+    {
+      "name": "02 - Autenticação",
+      "item": [
+        {
+          "name": "Registrar proprietário",
+          "event": [
+            { "listen": "prerequest", "script": { "exec": ["pm.collectionVariables.set('email', `demo.${Date.now()}@example.com`);"] } },
+            { "listen": "test", "script": { "exec": ["pm.test('status 201', () => pm.response.to.have.status(201));"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Usuário Demo\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}" },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login do proprietário",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));", "const token = pm.response.json().token;", "pm.expect(token).to.be.a('string').and.not.empty;", "pm.collectionVariables.set('token', token);", "pm.collectionVariables.set('ownerToken', token);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}" }, "url": "{{baseUrl}}/auth/login" }
+        },
+        {
+          "name": "Meu perfil",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().email).to.eql(pm.collectionVariables.get('email'));"] } }],
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/me" }
+        }
+      ]
+    },
+    {
+      "name": "03 - Catálogo e carteira",
+      "item": [
+        {
+          "name": "Criar categoria",
+          "event": [
+            { "listen": "prerequest", "script": { "exec": ["pm.collectionVariables.set('categoryName', `Ações Demo ${Date.now()}`);"] } },
+            { "listen": "test", "script": { "exec": ["pm.test('status 201', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('categoryId', pm.response.json().id);"] } }
+          ],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"{{categoryName}}\",\n  \"description\": \"Categoria criada pela coleção Postman\",\n  \"riskLevel\": \"MEDIUM\"\n}" }, "url": "{{baseUrl}}/categories" }
+        },
+        {
+          "name": "Criar ativo",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 201', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('assetId', pm.response.json().id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"ticker\": \"DEMO{{categoryId}}\",\n  \"name\": \"Ativo de Demonstração\",\n  \"categoryId\": {{categoryId}},\n  \"currentPrice\": 30.00\n}" }, "url": "{{baseUrl}}/assets" }
+        },
+        {
+          "name": "Criar carteira",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 201', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('portfolioId', pm.response.json().id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Carteira Demo\",\n  \"description\": \"Fluxo completo pelo Postman\"\n}" }, "url": "{{baseUrl}}/me/portfolios" }
+        }
+      ]
+    },
+    {
+      "name": "04 - Operações financeiras",
+      "item": [
+        {
+          "name": "Registrar compra",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 201', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('transactionId', pm.response.json().id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"portfolioId\": {{portfolioId}},\n  \"assetId\": {{assetId}},\n  \"type\": \"BUY\",\n  \"quantity\": 10,\n  \"price\": 30.00,\n  \"transactionDate\": \"2026-09-22\",\n  \"fees\": 1.00,\n  \"notes\": \"Compra de demonstração\"\n}" }, "url": "{{baseUrl}}/portfolios/{{portfolioId}}/transactions" }
+        },
+        {
+          "name": "Registrar venda parcial",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 201', () => pm.response.to.have.status(201));"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"portfolioId\": {{portfolioId}},\n  \"assetId\": {{assetId}},\n  \"type\": \"SELL\",\n  \"quantity\": 4,\n  \"price\": 35.00,\n  \"transactionDate\": \"2026-09-22\",\n  \"fees\": 1.00,\n  \"notes\": \"Venda parcial de demonstração\"\n}" }, "url": "{{baseUrl}}/portfolios/{{portfolioId}}/transactions" }
+        },
+        {
+          "name": "Bloquear venda acima do saldo",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 400', () => pm.response.to.have.status(400));"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"portfolioId\": {{portfolioId}},\n  \"assetId\": {{assetId}},\n  \"type\": \"SELL\",\n  \"quantity\": 7,\n  \"price\": 35.00,\n  \"transactionDate\": \"2026-09-22\",\n  \"fees\": 0\n}" }, "url": "{{baseUrl}}/portfolios/{{portfolioId}}/transactions" }
+        },
+        {
+          "name": "Listar investimentos e guardar ID",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));", "const investment = pm.response.json().content[0];", "pm.expect(investment.quantity).to.eql(6);", "pm.collectionVariables.set('investmentId', investment.id);"] } }],
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/portfolios/{{portfolioId}}/investments?page=0&size=20" }
+        },
+        {
+          "name": "Consultar P&L",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/portfolios/{{portfolioId}}/investments/{{investmentId}}/pnl" }
+        },
+        {
+          "name": "Consultar resumo da carteira",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/me/portfolios/{{portfolioId}}/summary" }
+        },
+        {
+          "name": "Consultar dashboard",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/me/dashboard" }
+        }
+      ]
+    },
+    {
+      "name": "05 - Alertas e segurança",
+      "item": [
+        {
+          "name": "Criar alerta do usuário atual",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 201', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('alertId', pm.response.json().id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"assetId\": {{assetId}},\n  \"targetPrice\": 40.00,\n  \"condition\": \"ABOVE\"\n}" }, "url": "{{baseUrl}}/me/alerts" }
+        },
+        {
+          "name": "Desativar alerta",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));", "pm.expect(pm.response.json().isActive).to.eql(false);"] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/me/alerts/{{alertId}}/deactivate" }
+        },
+        {
+          "name": "Registrar invasor",
+          "event": [
+            { "listen": "prerequest", "script": { "exec": ["pm.collectionVariables.set('attackerEmail', `attacker.${Date.now()}@example.com`);"] } },
+            { "listen": "test", "script": { "exec": ["pm.test('status 201', () => pm.response.to.have.status(201));"] } }
+          ],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Invasor Demo\",\n  \"email\": \"{{attackerEmail}}\",\n  \"password\": \"{{password}}\"\n}" }, "url": "{{baseUrl}}/auth/register" }
+        },
+        {
+          "name": "Login do invasor",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));", "pm.collectionVariables.set('token', pm.response.json().token);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{attackerEmail}}\",\n  \"password\": \"{{password}}\"\n}" }, "url": "{{baseUrl}}/auth/login" }
+        },
+        {
+          "name": "Bloquear acesso cruzado à carteira",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 403', () => pm.response.to.have.status(403));"] } }],
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/me/portfolios/{{portfolioId}}" }
+        },
+        {
+          "name": "Restaurar token do proprietário",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));", "pm.collectionVariables.set('token', pm.collectionVariables.get('ownerToken'));"] } }],
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ownerToken}}" }], "url": "{{baseUrl}}/me/dashboard" }
+        }
+      ]
+    },
+    {
+      "name": "06 - Dados de mercado",
+      "item": [
+        {
+          "name": "Consultar SELIC",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/market/indicators/selic" }
+        },
+        {
+          "name": "Consultar IPCA",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/market/indicators/ipca" }
+        },
+        {
+          "name": "Consultar cotação Brapi (opcional)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/market/quote/PETR4" }
+        }
+      ]
+    }
+  ]
+}
